@@ -7,15 +7,16 @@
 |name|string|null:false|
 |email|string|null:false,unique: true|
 |avatar|string|
+|admin|boolean|default: false|
 |password|string|null:false,unique: true|
 |entry_id|integer|null:false,foreign_key:true|
 
 ### Association
-has_many :entries
-has_many :messages
-has_many :lerns
-has_many :draftlernings
-has_many :follows
+has_many :entries <br>
+has_many :messages<br>
+has_many :lerns<br>
+has_many :draftlernings<br>
+has_many :follows<br>
 has_many :linkes
 
 ## Learnsテーブル
@@ -26,11 +27,11 @@ has_many :linkes
 |time|integer|null:false|
 |achievement_rate|integer|null:false|
 |user_id|integer|null:false,foreign_key:true|
-|draft_lerning_id |integer|null:false,foreign_key:true|
+|draft_lern_id |integer|null:false,foreign_key:true|
 
 ### Association
-belongs_to :user
-belongs_to :draftlerning
+belongs_to :user<br>
+belongs_to :draftlerning<br>
 has_many   :likes
 
 ## Draftlearnsテーブル
@@ -42,7 +43,7 @@ has_many   :likes
 |user_id|integer|null:false,foreign_key:true|
 
 ### Association
-belongs_to : user
+belongs_to : user <br>
 has_one    : draftlern
 
 ## Likesテーブル
@@ -53,10 +54,10 @@ has_one    : draftlern
 |learn_id|integer|null:false,foreign_key:true|
 
 ### Association
-belongs_to : user
+belongs_to : user <br>
 belongs_to : learn
 
-## Followテーブル
+## Followsテーブル
 |Column|Type|Options|
 |------|----|-------|
 |id|integer|null:false|
@@ -73,7 +74,7 @@ has_many : users
 |user_id|integer|null:false,foreign_key:true|
 |room_id|integer|null:false,foreign_key:true|
 ### Association
-belong_to : user
+belong_to : user <br>
 belong_to : room
 
 ## Roomsテーブル
@@ -83,7 +84,7 @@ belong_to : room
 |user_id|integer|null:false,foreign_key:true|
 
 ### Association
-has_many : entries
+has_many : entries <br>
 has_many : messages
 
 ## Entriesテーブル
@@ -94,5 +95,5 @@ has_many : messages
 |room_id|integer|null:false,foreign_key:true|
 
 ### Association
-belong_to : user
+belong_to : user <br>
 belong_to : room
