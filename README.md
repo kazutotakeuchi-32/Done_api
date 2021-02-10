@@ -16,8 +16,11 @@ has_many :entries <br>
 has_many :messages<br>
 has_many :lerns<br>
 has_many :draftlernings<br>
-has_many :follows<br>
-has_many :linkes
+has_many :likes <br>
+has_many :relationships <br>
+has_many :followings, through: :relationships, source: :follow <br>
+has_many :reverse_of_relationships, class_name: 'Relationship', foreign_key: 'follow_id' <br>
+has_many :followers, through: :reverse_of_relationships, source: :user
 
 ## Learnsテーブル
 |Column|Type|Options|
@@ -57,14 +60,16 @@ has_one    : draftlern
 belongs_to : user <br>
 belongs_to : learn
 
-## Followsテーブル
+## Relationshipsテーブル
 |Column|Type|Options|
 |------|----|-------|
 |id|integer|null:false|
 |user_id|integer|null:false,foreign_key:true|
 |follow_id|integer|null:false,foreign_key:true|
 ### Association
-has_many : users
+belongs_to :user <br>
+belongs_to :follow, class_name: 'User'
+
 
 ## Messagesテーブル
 |Column|Type|Options|
