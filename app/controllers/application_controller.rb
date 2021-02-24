@@ -5,9 +5,8 @@ class ApplicationController < ActionController::API
         protected
          def configre_permitted_parameters
            devise_parameter_sanitizer.permit(:sign_up, keys: [:name] )
-           devise_parameter_sanitizer.permit(:account_update, keys: [:name,:email,:avatar])
+           devise_parameter_sanitizer.permit(:account_update, keys: [:name,:email,:avatar,:image],methods: [:image_url] )
          end
-
 end
 
 # def skip_session

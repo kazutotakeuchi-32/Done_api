@@ -1,7 +1,9 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Examples:
-#
-#   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
-#   Character.create(name: 'Luke', movie: movies.first)
+user = User.new(name:'kazuto',email: 'kazutotakeuchi32@gmail.com', password: '000000')
+user.save!
+user.image.attach(
+  io:File.open('/Users/kazuto/projects/Rails/Done/Done_api/storage/images/_h21AB7G.png'),
+  filename: '_h21AB7G.png',
+  content_type: 'application/png'
+)
+# storage/images/_h21AB7G.png
+# /Users/kazuto/projects/Rails/Done/Done_api/storage/images/_h21AB7G.png
