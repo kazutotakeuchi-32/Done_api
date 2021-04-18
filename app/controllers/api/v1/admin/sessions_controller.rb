@@ -54,64 +54,63 @@ class Api::V1::Admin::SessionsController < DeviseTokenAuth::RegistrationsControl
   end
 
   protected
+    def valid_params?(key, val)
+      resource_params[:password] && key && val
+    end
 
-  def valid_params?(key, val)
-    resource_params[:password] && key && val
-  end
+    def get_auth_params
+      auth_key = nil
+      auth_val = nil
 
-  def get_auth_params
-    auth_key = nil
-    auth_val = nil
-
-    # iterate thru allowed auth keys, use first found
-    resource_class.authentication_keys.each do |k|
-      if resource_params[k]
-        auth_val = resource_params[k]
-        auth_key = k
-        break
+      # iterate thru allowed auth keys, use first found
+      resource_class.authentication_keys.each do |k|
+        if resource_params[k]
+          auth_val = resource_params[k]
+          auth_key = k
+          break
+        end
       end
+
+      # honor devise configuration for case_insensitive_keys
+      if resource_class.case_insensitive_keys.include?(auth_key)
+        auth_val.downcase!
+      end
+
+      { key: auth_key, val: auth_val }
     end
 
-    # honor devise configuration for case_insensitive_keys
-    if resource_class.case_insensitive_keys.include?(auth_key)
-      auth_val.downcase!
+    def render_new_error
+      render_error(405, I18n.t('devise_token_auth.sessions.not_supported'))
     end
 
-    { key: auth_key, val: auth_val }
-  end
+    def render_create_success
+      render json: {
+        data: resource_data(resource_json: @resource.token_validation_response),
+        headers:@token
+      },status: 200
+    end
 
-  def render_new_error
-    render_error(405, I18n.t('devise_token_auth.sessions.not_supported'))
-  end
+    def render_create_error_not_confirmed
+      render_error(401, I18n.t('devise_token_auth.sessions.not_confirmed', email: @resource.email))
+    end
 
-  def render_create_success
-    render json: {
-      data: resource_data(resource_json: @resource.token_validation_response),
-      headers:@token
-    },status: 200
-  end
+    def render_create_error_account_locked
+      render_error(401, I18n.t('devise.mailer.unlock_instructions.account_lock_msg'))
+    end
 
-  def render_create_error_not_confirmed
-    render_error(401, I18n.t('devise_token_auth.sessions.not_confirmed', email: @resource.email))
-  end
+    def render_create_error_bad_credentials
+      render_error(401, I18n.t('devise_token_auth.sessions.bad_credentials'))
+    end
 
-  def render_create_error_account_locked
-    render_error(401, I18n.t('devise.mailer.unlock_instructions.account_lock_msg'))
-  end
+    def render_destroy_success
+      render json: {
+        success:true
+      }, status: 200
+    end
 
-  def render_create_error_bad_credentials
-    render_error(401, I18n.t('devise_token_auth.sessions.bad_credentials'))
-  end
-
-  def render_destroy_success
-    render json: {
-      success:true
-    }, status: 200
-  end
-
-  def render_destroy_error
-    render_error(404, I18n.t('devise_token_auth.sessions.user_not_found'))
-  end
+    def render_destroy_error
+      render_error(404, I18n.t('devise_token_auth.sessions.user_not_found'))
+    end
 
   private
     def resource_params

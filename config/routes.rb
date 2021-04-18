@@ -7,6 +7,12 @@ Rails.application.routes.draw do
       mount_devise_token_auth_for 'Admin', at: 'admin',controllers:{
         sessions: 'api/v1/admin/sessions'
       }
+      resources :users do
+        member do
+          get :learn_search
+        end
+      end
+      resources :draft_learns
     end
   end
   post   "rails/active_storage/direct_uploads", to:'direct_uploads#create'
