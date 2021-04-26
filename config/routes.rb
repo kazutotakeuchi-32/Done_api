@@ -10,9 +10,19 @@ Rails.application.routes.draw do
       resources :users do
         member do
           get :learn_search
+          get :search
         end
       end
-      resources :draft_learns
+      resources :draft_learns do
+        collection do
+          get :todays_task
+        end
+      end
+      resources :learns do
+        collection do
+          get :todays_task
+        end
+      end
     end
   end
   post   "rails/active_storage/direct_uploads", to:'direct_uploads#create'

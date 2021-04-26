@@ -7,8 +7,8 @@ class User < ActiveRecord::Base
   include DeviseTokenAuth::Concerns::User
   has_one_attached :image
   has_many :draft_learns
+  has_many :learns
   def image_url
     image.attached? ? url_for(image) : nil
   end
-
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_01_104428) do
+ActiveRecord::Schema.define(version: 2021_04_18_104835) do
 
   create_table "active_storage_attachments", charset: "utf8mb4", force: :cascade do |t|
     t.string "name", null: false
@@ -75,6 +75,19 @@ ActiveRecord::Schema.define(version: 2021_03_01_104428) do
     t.index ["user_id"], name: "index_draft_learns_on_user_id"
   end
 
+  create_table "learns", charset: "utf8mb4", force: :cascade do |t|
+    t.string "title", null: false
+    t.string "content", null: false
+    t.string "subject", null: false
+    t.integer "time", null: false
+    t.bigint "user_id", null: false
+    t.bigint "draft_learn_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["draft_learn_id"], name: "index_learns_on_draft_learn_id"
+    t.index ["user_id"], name: "index_learns_on_user_id"
+  end
+
   create_table "users", charset: "utf8mb4", force: :cascade do |t|
     t.string "provider", default: "email", null: false
     t.string "uid", default: "", null: false
@@ -108,4 +121,6 @@ ActiveRecord::Schema.define(version: 2021_03_01_104428) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "draft_learns", "users"
+  add_foreign_key "learns", "draft_learns"
+  add_foreign_key "learns", "users"
 end
