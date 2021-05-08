@@ -10,17 +10,22 @@ Rails.application.routes.draw do
       resources :users do
         member do
           get :learn_search
+          get :draft_search
+        end
+        collection do
           get :search
         end
       end
       resources :draft_learns do
         collection do
           get :todays_task
+          get :past_tasks
         end
       end
       resources :learns do
         collection do
           get :todays_task
+          get :past_tasks
         end
       end
     end

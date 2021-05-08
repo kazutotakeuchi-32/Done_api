@@ -1,8 +1,8 @@
 class Api::V1::UsersController < ApplicationController
-  before_action :set_date, only: [:show, :learn_search,:search]
-  before_action :set_user, only: [:show, :learn_search,:search]
-  before_action :set_draft_learns, only: [:show, :learn_search,:search]
-  before_action :set_learns, only: [:show, :learn_search,:search]
+  before_action :set_date, only: [:show, :learn_search,:draft_search]
+  before_action :set_user, only: [:show, :learn_search,:draft_search]
+  before_action :set_draft_learns, only: [:show, :learn_search,:draft_search]
+  before_action :set_learns, only: [:show, :learn_search,:draft_search]
 
   def show
     model_class=[{model:DraftLearn},{model:Learn}]
@@ -35,6 +35,17 @@ class Api::V1::UsersController < ApplicationController
     },status:200
   end
 
+  def search
+    return render json:{data:{users:[] }} if params[:search].blank? || params[:search]==nil
+    # users = User.where("name LIKE ? ","%#{params[:search]}%")
+    users = User.where("name LIKE ? AND id!=?","%#{params[:search]}%",params[:id])
+    render json:{
+      data:{
+       users:users,
+       message:users.length==0 ? "検索結果がありません。": ""
+      }
+    }
+  end
 
   def learn_search
     model_class=[{model:DraftLearn},{model:Learn}]
@@ -58,7 +69,7 @@ class Api::V1::UsersController < ApplicationController
     },status:200
   end
 
-  def search
+  def draft_search
     model_class=[{model:DraftLearn},{model:Learn}]
     draft_learn_next_tasks,draft_learn_next_tasks_title,draft_learn_previous_tasks,draft_learn_previous_tasks_title = get_learn_data(model_class[0],@draft_learns)
     learn_next_tasks,learn_next_tasks_title,learn_previous_tasks,learn_previous_tasks_title = get_learn_data(model_class[1],@learns)
