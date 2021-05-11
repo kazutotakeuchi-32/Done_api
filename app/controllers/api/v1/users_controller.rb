@@ -1,9 +1,8 @@
 class Api::V1::UsersController < ApplicationController
   before_action :set_date, only: [:show, :learn_search,:draft_search]
-  before_action :set_user, only: [:show, :learn_search,:draft_search]
+  before_action :set_user, only: [:show, :learn_search,:draft_search,:follows,:followers]
   before_action :set_draft_learns, only: [:show, :learn_search,:draft_search]
   before_action :set_learns, only: [:show, :learn_search,:draft_search]
-
   def show
     model_class=[{model:DraftLearn},{model:Learn}]
     draft_learn_next_tasks,draft_learn_next_tasks_title,draft_learn_previous_tasks,draft_learn_previous_tasks_title = get_learn_data(model_class[0],@draft_learns)
@@ -11,6 +10,8 @@ class Api::V1::UsersController < ApplicationController
     render json:{
       data:{
         user:@user,
+        followings:@user.following_ids,
+        followers:@user.follower_ids,
         draftLearns:{
           nextTasks:{
             data: draft_learn_next_tasks,
@@ -91,6 +92,26 @@ class Api::V1::UsersController < ApplicationController
     },status:200
   end
 
+  def follows
+    followings=@user.followings
+    render json:{
+      data:{
+        followings:followings,
+        message:followings.length==0 ? "フォローしているユーザがいません。" : ""
+      }
+    }
+  end
+
+  def followers
+   followers = @user.followers
+   render json:{
+     data:{
+       followers:followers,
+       message:followers.length==0? "フォロワーがいません" : ""
+     }
+   }
+  end
+
 
   private
 
@@ -150,31 +171,31 @@ end
 
 # previous_tasks = learns.select{|l|l if l.created_at.to_s < Date.today.to_s}.sort{|a,b| a.created_at.to_i<=>b.created_at.to_i}
 # output=[]
-    # (from.month..to.month).each do |m|
-    #   sum=0
-    #   sum_days=learns.where("created_at >= ? and created_at <= ?",Time.new(params[:year],m),Time.new(params[:year],m).end_of_month)
-    #   sum_days.each do |sum_day|
-    #     puts sum_day.time
-    #     sum+=sum_day.time
-    #   end
-    #   output.push({label:"#{m}月",data:sum})
-    # end
-    # (from.month..to.month).each do |m|
-    #   sum=0
-    #   sum_days=learns.where("created_at >= ? and created_at <= ?",Time.new(params[:year],m),Time.new(params[:year],m).end_of_month)
-    #   sum_days.each do |sum_day|
-    #     puts sum_day.time
-    #     sum+=sum_day.time
-    #   end
-    #   output.push({label:"&#{m}月",data:sum})
-    # end
-    # (from.day..to.day).each do |d|
-    #   sum=0
-    #   sum_days=learns.where("created_at >= ? and created_at <= ?",Time.new(params[:year],params[:month],d),Time.new(params[:year],params[:month],d).end_of_day)
-    #   sum_days.each do |sum_day|
-    #     puts sum_day.time
-    #     sum+=sum_day.time
-    #   end
-    #   output.push({label:"#{params[:month]}月#{d}日",data:sum})
-    # end
-    #  p output
+#     (from.month..to.month).each do |m|
+#       sum=0
+#       sum_days=learns.where("created_at >= ? and created_at <= ?",Time.new(params[:year],m),Time.new(params[:year],m).end_of_month)
+#       sum_days.each do |sum_day|
+#         puts sum_day.time
+#         sum+=sum_day.time
+#       end
+#       output.push({label:"#{m}月",data:sum})
+#     end
+#     (from.month..to.month).each do |m|
+#       sum=0
+#       sum_days=learns.where("created_at >= ? and created_at <= ?",Time.new(params[:year],m),Time.new(params[:year],m).end_of_month)
+#       sum_days.each do |sum_day|
+#         puts sum_day.time
+#         sum+=sum_day.time
+#       end
+#       output.push({label:"&#{m}月",data:sum})
+#     end
+#     (from.day..to.day).each do |d|
+#       sum=0
+#       sum_days=learns.where("created_at >= ? and created_at <= ?",Time.new(params[:year],params[:month],d),Time.new(params[:year],params[:month],d).end_of_day)
+#       sum_days.each do |sum_day|
+#         puts sum_day.time
+#         sum+=sum_day.time
+#       end
+#       output.push({label:"#{params[:month]}月#{d}日",data:sum})
+#     end
+#      p output

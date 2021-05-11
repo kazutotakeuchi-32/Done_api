@@ -11,6 +11,8 @@ Rails.application.routes.draw do
         member do
           get :learn_search
           get :draft_search
+          get :follows
+          get :followers
         end
         collection do
           get :search
@@ -28,6 +30,7 @@ Rails.application.routes.draw do
           get :past_tasks
         end
       end
+      resources :relationships,only:[:create,:destroy]
     end
   end
   post   "rails/active_storage/direct_uploads", to:'direct_uploads#create'
