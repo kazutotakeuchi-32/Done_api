@@ -13,6 +13,7 @@ Rails.application.routes.draw do
           get :draft_search
           get :follows
           get :followers
+          get :time_line
         end
         collection do
           get :search

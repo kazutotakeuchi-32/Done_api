@@ -1,6 +1,6 @@
 class Api::V1::UsersController < ApplicationController
   before_action :set_date, only: [:show, :learn_search,:draft_search]
-  before_action :set_user, only: [:show, :learn_search,:draft_search,:follows,:followers]
+  before_action :set_user, only: [:show, :learn_search,:draft_search,:follows,:followers,:time_line]
   before_action :set_draft_learns, only: [:show, :learn_search,:draft_search]
   before_action :set_learns, only: [:show, :learn_search,:draft_search]
   def show
@@ -112,6 +112,20 @@ class Api::V1::UsersController < ApplicationController
    }
   end
 
+  def time_line
+    cuurent_page=params[:cuurent_page].to_i
+    users,time_line = aggregation_type(params[:type])
+    output=User.time_line(time_line,users)
+    max_page = get_max_page(output)
+    end_range   = (cuurent_page*30-1)
+    start_range = cuurent_page-1 <=0  ? 0 : (cuurent_page-1)*30
+    render json:{
+      data:{
+        timeLine:output[start_range..end_range],
+        maxPage:max_page
+      }
+    }
+  end
 
   private
 
@@ -167,6 +181,38 @@ class Api::V1::UsersController < ApplicationController
       return data,search_learn_task_title
    end
 
+   def get_time_line(following_ids)
+    qurey = following_ids.map{|id|" OR user_id=#{id}"}.join
+    time_line=DraftLearn.friends_data_with_me(qurey,@user)+Learn.friends_data_with_me(qurey,@user)
+    time_line=time_line.group_by{|t| t.created_at.to_date }.values
+    return time_line
+   end
+
+   def get_max_page(output)
+    if output.length%30==0
+      max_page=output.length/30
+    else
+      max_page=output.length/30+1
+    end
+   end
+
+   def aggregation_type(type)
+    case type
+      when "BASIC"
+        # タイムライン
+        following_ids=@user.following_ids
+        time_line = get_time_line(following_ids)
+        users=@user.combine_with_friends
+      when "MYONLY"
+        # ユーザの投稿のみ
+        time_line = get_time_line([@user.id])
+        users=[@user]
+      when "LIKE"
+        # いいねした日付の投稿を取得する
+      else
+    end
+    return users,time_line
+   end
 end
 
 # previous_tasks = learns.select{|l|l if l.created_at.to_s < Date.today.to_s}.sort{|a,b| a.created_at.to_i<=>b.created_at.to_i}

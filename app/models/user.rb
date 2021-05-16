@@ -28,8 +28,76 @@ class User < ActiveRecord::Base
     self.followings.include?(other_user)
   end
 
+  def combine_with_friends
+    users=[self]+self.followings
+    users.sort!{|a,b|a.id<=>b.id}
+  end
+
   def image_url
     image.attached? ? url_for(image) : nil
+  end
+
+  def self.get_achievement_rate(dividend,divisor)
+    return 0 if divisor<=0
+    achievement_rate=(dividend/divisor.to_f)*100
+    achievement_rate.round
+  end
+
+  def self.time_line(time_line,users)
+    output=[]
+    time_line.each do |time_line|
+      draft,learn=time_line.sort{|a,b|a.user_id<=>b.user_id}.group_by{|d|d[:draft_learn_id]!=nil}.values
+      strings1=[]
+      if draft
+        time = 0
+        user_id= draft[0].user_id
+        string1="#{draft[0].created_at.year}/#{draft[0].created_at.month}/#{draft[0].created_at.day}\n学習計画"
+        i=1
+        draft.each do |d|
+          if user_id != d.user_id
+            strings1.push({user:users.find{|user|user.id==user_id} ,data:string1+"\n学習計画(時):#{time}"})
+            string1="#{d.created_at.year}/#{d.created_at.month}/#{d.created_at.day}\n学習計画"
+            time=0
+            user_id=d.user_id
+            i=1
+          end
+          string1+="\n#{i}.#{d.title}"
+          time+=d.time
+          i+=1
+        end
+        strings1.push({user:users.find{|user|user.id==user_id}, data:string1+"\n学習計画(時):#{time}"})
+      end
+      strings2=[]
+      if learn
+        time = 0
+        user_id= learn[0].user_id
+        date="#{learn[0].created_at.year}/#{learn[0].created_at.month}/#{learn[0].created_at.day}"
+        string2="#{date}\n学習の振り返り"
+        plan_time=nil
+        i=1
+        learn.each do |l|
+          if user_id != l.user_id
+            date="#{l.created_at.year}/#{l.created_at.month}/#{l.created_at.day}"
+            plan_time=strings1.select{|s|s[:data].include?(date)&&s[:user][:id]==user_id}[0][:data].match(/学習計画\(時\):[0-9]*/)[0]
+            # strings2.push({user:users.find{|user|user.id==user_id},data:string2+"\n#{plan_time}"+"\n学習完了（時）：#{time}"})
+            strings2.push({user:users.find{|user|user.id==user_id},data:string2+"\n#{plan_time}"+"\n学習完了（時）：#{time}\n達成率(%)：#{self.get_achievement_rate(time,plan_time.to_s.match(/[0-9]+/)[0].to_i)}"})
+            string2="#{l.created_at.year}/#{l.created_at.month}/#{l.created_at.day}\n学習の振り返り"
+            user_id=l.user_id
+            time=0
+            i=1
+          end
+          string2+="\n#{i}.#{l.title}"
+          time+=l.time
+          i+=1
+        end
+        plan_time=strings1.select{|s|s[:data].include?(date)&&s[:user][:id]==user_id}[0][:data].match(/学習計画\(時\):[0-9]*/)
+        # strings2.push({user:users.find{|user|user.id==user_id},data:string2+"\n学習完了（時）：#{time}"})
+        strings2.push({user:users.find{|user|user.id==user_id},data:string2+"\n#{plan_time}"+"\n学習完了（時）：#{time}\n達成率(%)：#{self.get_achievement_rate(time,plan_time.to_s.match(/[0-9]+/)[0].to_i)}"})
+      end
+      output.push(strings1,strings2)
+    end
+    output=output.delete_if(&:empty?).flatten
+    output
   end
 
 end
