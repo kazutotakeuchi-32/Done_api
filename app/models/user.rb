@@ -8,6 +8,9 @@ class User < ActiveRecord::Base
   has_one_attached :image
   has_many :draft_learns
   has_many :learns
+  has_many :likes
+  has_many :learn_likes,through: :likes, source: :learn
+  has_many :draft_learn_likes,through: :likes, source: :draft_learn
   has_many :relationships
   has_many :followings,through: :relationships, source: :follow
   has_many :reverse_of_relationships,class_name: 'Relationship',foreign_key: :follow_id
@@ -28,6 +31,17 @@ class User < ActiveRecord::Base
     self.followings.include?(other_user)
   end
 
+  def likeing(other_user)
+    if self.id != other_user.id
+      self.relationships.find_or_create_by(follow_id:other_user.id)
+    end
+  end
+
+  def unlike(other_user)
+    learn_like=self.learn_likes.find_by(id:other_user.id)
+    learn_likes.destroy if learn_likes
+  end
+
   def combine_with_friends
     users=[self]+self.followings
     users.sort!{|a,b|a.id<=>b.id}
@@ -35,6 +49,36 @@ class User < ActiveRecord::Base
 
   def image_url
     image.attached? ? url_for(image) : nil
+  end
+
+  def likeing_type(type,d)
+    case type
+      when  "DRAFTLEARN"
+        likeing_contents=self.draft_learns.where(created_at:Time.new(d[0],d[1],d[2]).beginning_of_day..Time.new(d[0],d[1],d[2]).end_of_day)
+        model={id:"draft_learn_id"}
+      when  "LEARN"
+        likeing_contents=self.learns.where(created_at:Time.new(d[0],d[1],d[2]).beginning_of_day..Time.new(d[0],d[1],d[2]).end_of_day)
+        model={id:"learn_id"}
+    end
+    return likeing_contents,model
+  end
+
+  def unlike_type(type,other_user,d)
+    case type
+      when  "DRAFTLEARN"
+        likeing_contents = self.draft_learn_likes.where(
+          created_at:Time.new(d[0],d[1],d[2]).beginning_of_day..Time.new(d[0],d[1],d[2]).end_of_day,
+          user_id:other_user.id
+        )
+        model={id:"draft_learn_id"}
+      when  "LEARN"
+        likeing_contents = self.learn_likes.where(
+          created_at:Time.new(d[0],d[1],d[2]).beginning_of_day..Time.new(d[0],d[1],d[2]).end_of_day,
+          user_id:other_user.id
+        )
+        model={id:"learn_id"}
+    end
+    return likeing_contents,model
   end
 
   def self.get_achievement_rate(dividend,divisor)
@@ -55,7 +99,12 @@ class User < ActiveRecord::Base
         i=1
         draft.each do |d|
           if user_id != d.user_id
-            strings1.push({user:users.find{|user|user.id==user_id} ,data:string1+"\n学習計画(時):#{time}"})
+            strings1.push(
+            {
+              user:users.find{|user|user.id==user_id},
+              data:string1+"\n学習計画(時):#{time}",
+              likes: d.likes,
+              })
             string1="#{d.created_at.year}/#{d.created_at.month}/#{d.created_at.day}\n学習計画"
             time=0
             user_id=d.user_id
@@ -65,7 +114,7 @@ class User < ActiveRecord::Base
           time+=d.time
           i+=1
         end
-        strings1.push({user:users.find{|user|user.id==user_id}, data:string1+"\n学習計画(時):#{time}"})
+        strings1.push({user:users.find{|user|user.id==user_id}, data:string1+"\n学習計画(時):#{time}",data:string1+"\n学習計画(時):#{time}",likes:draft[draft.size-1].likes})
       end
       strings2=[]
       if learn
@@ -80,7 +129,7 @@ class User < ActiveRecord::Base
             date="#{l.created_at.year}/#{l.created_at.month}/#{l.created_at.day}"
             plan_time=strings1.select{|s|s[:data].include?(date)&&s[:user][:id]==user_id}[0][:data].match(/学習計画\(時\):[0-9]*/)[0]
             # strings2.push({user:users.find{|user|user.id==user_id},data:string2+"\n#{plan_time}"+"\n学習完了（時）：#{time}"})
-            strings2.push({user:users.find{|user|user.id==user_id},data:string2+"\n#{plan_time}"+"\n学習完了（時）：#{time}\n達成率(%)：#{self.get_achievement_rate(time,plan_time.to_s.match(/[0-9]+/)[0].to_i)}"})
+            strings2.push({user:users.find{|user|user.id==user_id},data:string2+"\n#{plan_time}"+"\n学習完了（時）：#{time}\n達成率(%)：#{self.get_achievement_rate(time,plan_time.to_s.match(/[0-9]+/)[0].to_i)}",likes:l.likes})
             string2="#{l.created_at.year}/#{l.created_at.month}/#{l.created_at.day}\n学習の振り返り"
             user_id=l.user_id
             time=0
@@ -91,8 +140,8 @@ class User < ActiveRecord::Base
           i+=1
         end
         plan_time=strings1.select{|s|s[:data].include?(date)&&s[:user][:id]==user_id}[0][:data].match(/学習計画\(時\):[0-9]*/)
-        # strings2.push({user:users.find{|user|user.id==user_id},data:string2+"\n学習完了（時）：#{time}"})
-        strings2.push({user:users.find{|user|user.id==user_id},data:string2+"\n#{plan_time}"+"\n学習完了（時）：#{time}\n達成率(%)：#{self.get_achievement_rate(time,plan_time.to_s.match(/[0-9]+/)[0].to_i)}"})
+        #strings2.push({user:users.find{|user|user.id==user_id},data:string2+"\n学習完了（時）：#{time}"})
+        strings2.push({user:users.find{|user|user.id==user_id},data:string2+"\n#{plan_time}"+"\n学習完了（時）：#{time}\n達成率(%)：#{self.get_achievement_rate(time,plan_time.to_s.match(/[0-9]+/)[0].to_i)}",likes:learn[learn.size-1].likes})
       end
       output.push(strings1,strings2)
     end

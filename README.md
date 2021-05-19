@@ -55,10 +55,11 @@ has_one    : draftlern
 |id|integer|null:false|
 |user_id|integer|null:false,foreign_key:true|
 |learn_id|integer|null:false,foreign_key:true|
-
+|draft_learn_id|integer|null:false,foregin_key:true|
 ### Association
 belongs_to : user <br>
-belongs_to : learn
+belongs_to : learn<br>
+belongs_to : draft_learn
 
 ## Relationshipsテーブル
 |Column|Type|Options|

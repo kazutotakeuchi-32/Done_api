@@ -32,6 +32,8 @@ Rails.application.routes.draw do
         end
       end
       resources :relationships,only:[:create,:destroy]
+      resources :likes,only:[:create]
+      delete "likes", to: "likes#destroy"
     end
   end
   post   "rails/active_storage/direct_uploads", to:'direct_uploads#create'

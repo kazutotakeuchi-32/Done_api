@@ -209,39 +209,12 @@ class Api::V1::UsersController < ApplicationController
         users=[@user]
       when "LIKE"
         # いいねした日付の投稿を取得する
+        # following_ids=@user.following_ids
+        likeing_contents = @user.draft_learn_likes+@user.learn_likes
+        users=@user.combine_with_friends
+        time_line=likeing_contents.group_by{|t| t.created_at.to_date }.values
       else
     end
     return users,time_line
    end
 end
-
-# previous_tasks = learns.select{|l|l if l.created_at.to_s < Date.today.to_s}.sort{|a,b| a.created_at.to_i<=>b.created_at.to_i}
-# output=[]
-#     (from.month..to.month).each do |m|
-#       sum=0
-#       sum_days=learns.where("created_at >= ? and created_at <= ?",Time.new(params[:year],m),Time.new(params[:year],m).end_of_month)
-#       sum_days.each do |sum_day|
-#         puts sum_day.time
-#         sum+=sum_day.time
-#       end
-#       output.push({label:"#{m}月",data:sum})
-#     end
-#     (from.month..to.month).each do |m|
-#       sum=0
-#       sum_days=learns.where("created_at >= ? and created_at <= ?",Time.new(params[:year],m),Time.new(params[:year],m).end_of_month)
-#       sum_days.each do |sum_day|
-#         puts sum_day.time
-#         sum+=sum_day.time
-#       end
-#       output.push({label:"&#{m}月",data:sum})
-#     end
-#     (from.day..to.day).each do |d|
-#       sum=0
-#       sum_days=learns.where("created_at >= ? and created_at <= ?",Time.new(params[:year],params[:month],d),Time.new(params[:year],params[:month],d).end_of_day)
-#       sum_days.each do |sum_day|
-#         puts sum_day.time
-#         sum+=sum_day.time
-#       end
-#       output.push({label:"#{params[:month]}月#{d}日",data:sum})
-#     end
-#      p output
