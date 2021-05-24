@@ -8,11 +8,15 @@ Rails.application.routes.draw do
         sessions: 'api/v1/admin/sessions'
       }
       resources :users do
+        resources :rooms,only:[:index,:show] do
+          resources :messages,only:[:create,:index]
+        end
         member do
           get :learn_search
           get :draft_search
           get :follows
           get :followers
+          get :mutual_following
           get :time_line
         end
         collection do
@@ -33,6 +37,7 @@ Rails.application.routes.draw do
       end
       resources :relationships,only:[:create,:destroy]
       resources :likes,only:[:create]
+      resources :entries,only:[:create]
       delete "likes", to: "likes#destroy"
     end
   end

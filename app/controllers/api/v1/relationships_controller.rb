@@ -21,6 +21,7 @@ class Api::V1::RelationshipsController < ApplicationController
       }},status:401
     end
   end
+
   def destroy
     @other_user = User.find(params[:id])
     if current_api_v1_user.following?(@other_user)

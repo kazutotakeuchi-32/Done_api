@@ -1,6 +1,6 @@
 class Api::V1::UsersController < ApplicationController
   before_action :set_date, only: [:show, :learn_search,:draft_search]
-  before_action :set_user, only: [:show, :learn_search,:draft_search,:follows,:followers,:time_line]
+  before_action :set_user, only: [:show, :learn_search,:draft_search,:follows,:followers,:time_line,:mutual_following]
   before_action :set_draft_learns, only: [:show, :learn_search,:draft_search]
   before_action :set_learns, only: [:show, :learn_search,:draft_search]
   def show
@@ -111,6 +111,23 @@ class Api::V1::UsersController < ApplicationController
      }
    }
   end
+
+  def mutual_following
+    mutual_following = @user.followings.select{|other_user|@user.mutual_following?(other_user)}
+    if params[:search]
+      mutual_following=mutual_following.select{|other_user|other_user.name.include?("#{params[:search]}")}
+      # mutual_following = mutual_following_filter.length==0 ? mutual_following : mutual_following_filter
+    end
+    message=mutual_following.length==0 ? "検索結果がありません。": ""
+    render json:{
+      data:{
+        users:mutual_following,
+        message:message
+      }
+    }
+  end
+
+
 
   def time_line
     cuurent_page=params[:cuurent_page].to_i

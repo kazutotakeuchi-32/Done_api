@@ -8,6 +8,12 @@ class User < ActiveRecord::Base
   has_one_attached :image
   has_many :draft_learns
   has_many :learns
+
+  has_many :entries
+  has_many :entry_to_rooms ,through: :entries, source: :room
+  has_many :messages
+  has_many :message_to_rooms ,through: :entries, source: :room
+
   has_many :likes
   has_many :learn_likes,through: :likes, source: :learn
   has_many :draft_learn_likes,through: :likes, source: :draft_learn
@@ -29,6 +35,10 @@ class User < ActiveRecord::Base
 
   def following?(other_user)
     self.followings.include?(other_user)
+  end
+
+  def mutual_following?(other_user)
+     self.following?(other_user)? other_user.following?(self) : false
   end
 
   def likeing(other_user)
