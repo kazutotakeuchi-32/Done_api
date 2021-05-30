@@ -39,6 +39,7 @@ Rails.application.routes.draw do
       resources :likes,only:[:create]
       resources :entries,only:[:create]
       delete "likes", to: "likes#destroy"
+      mount ActionCable.server => '/cable'
     end
   end
   post   "rails/active_storage/direct_uploads", to:'direct_uploads#create'
