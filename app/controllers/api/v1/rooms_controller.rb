@@ -22,6 +22,7 @@ class Api::V1::RoomsController < ApplicationController
     room = Room.find(params[:id])
     user=room.entry_to_users.select{|user|user.id != User.find(params[:user_id]).id}[0]
     messages = room.messages
+    # このタイミングで未読なメッセージがあった場合、既読に変更する。
     render json:{
       data:{
         room:room,
