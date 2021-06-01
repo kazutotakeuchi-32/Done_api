@@ -73,6 +73,8 @@ Rails.application.configure do
     authentication: 'plain',
     enable_starttls_auto: true
   }
+  # アクションケーブル
+  config.action_cable.allowed_request_origins = [ 'https://done-17941.web.app', 'http://localhost:3001']
   Rails.application.routes.default_url_options[:host] = 'localhost'
   Rails.application.routes.default_url_options[:port] = 3000
   # Uncomment if you wish to allow Action Cable access from any origin.

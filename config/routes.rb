@@ -10,6 +10,7 @@ Rails.application.routes.draw do
       resources :users do
         resources :rooms,only:[:index,:show] do
           resources :messages,only:[:create,:index]
+          resources :reads,only:[:update]
         end
         member do
           get :learn_search
