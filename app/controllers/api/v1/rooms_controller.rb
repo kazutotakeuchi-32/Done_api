@@ -10,12 +10,14 @@ class Api::V1::RoomsController < ApplicationController
       lastMessages=lastMessages ? lastMessages : {message:"まだトーク履歴がありません。",created_at:e.created_at}
       rooms.push({room:e,user:other_user,lastMessages:lastMessages})
     end
+    # ActionCable.server.broadcast("room_channel",{rooms:rooms})
     rooms.sort!{|a,b|b[:lastMessages][:created_at]<=>a[:lastMessages][:created_at]}
     render json:{
       data:{
         rooms:rooms
       }
     },status:200
+    # ActionCable.server.broadcast("room_channel",{rooms:rooms})
   end
 
 

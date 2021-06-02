@@ -5,7 +5,7 @@ class Api::V1::MessagesController < ApplicationController
       room = Room.find(message.room_id)
       read=Read.create(message_id:message.id,user_id:params[:user_id])
       MessagesChannel.broadcast_to room, {message:message,read:read,name:"未読"}
-
+      ActionCable.server.broadcast("room_channel",{room:room,message:message,read:read},)
       render json:{data:{message:message,read:read}},status:200
     else
       render json:{data:{message:"投稿に失敗しました。"}},status:401
