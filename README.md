@@ -12,16 +12,22 @@
 |entry_id|integer|null:false,foreign_key:true|
 
 ### Association
-has_many :entries <br>
+has_one_attached :image<br>
+has_many :draft_learns<br>
+has_many :learns<br>
+has_many :entries<br>
+has_many :entry_to_rooms ,through: :entries, source: :room<br>
 has_many :messages<br>
-has_many :lerns<br>
-has_many :draftlernings<br>
-has_many :likes <br>
-has_many :relationships <br>
-has_many :followings, through: :relationships, source: :follow <br>
-has_many :reverse_of_relationships, class_name: 'Relationship', foreign_key: 'follow_id' <br>
-has_many :followers, through: :reverse_of_relationships, source: :user <br>
+has_many :message_to_rooms ,through: :entries, source: :room<br>
+has_many :likes<br>
+has_many :learn_likes,through: :likes, source: :learn<br>
+has_many :draft_learn_likes,through: :likes, source: :draft_learn<br>
+has_many :relationships<br>
+has_many :followings,through: :relationships, source: :follow<br>
+has_many :reverse_of_relationships,class_name: 'Relationship',foreign_key: :follow_id<br>
+has_many :followers,through: :reverse_of_relationships,source: :user<br>
 has_many :reads
+
 <!-- has_many :notifications -->
 
 ## Learnsテーブル
@@ -49,7 +55,8 @@ has_many   :likes
 
 ### Association
 belongs_to : user <br>
-has_one    : draftlern
+has_one    : draftlern<br>
+has_many :likes
 
 ## Likesテーブル
 |Column|Type|Options|
@@ -83,7 +90,7 @@ belongs_to :follow, class_name: 'User'
 ### Association
 belong_to : user <br>
 belong_to : room <br>
-has_many   : messages
+has_one   :read
 
 ## Roomsテーブル
 |Column|Type|Options|
@@ -92,8 +99,10 @@ has_many   : messages
 |user_id|integer|null:false,foreign_key:true|
 
 ### Association
-has_many : entries <br>
-has_many : messages
+has_many :entries<br>
+has_many :entry_to_users ,through: :entries, source: :user<br>
+has_many :messages<br>
+has_many :message_to_users ,through: :entries, source: :user
 
 ## Entriesテーブル
 |Column|Type|Options|
@@ -112,6 +121,7 @@ Column|Type|Options|
 |id|integer|null:false|
 |user_id|integer|null:false,foreign_key:true|
 |message_id|integer|null:false,foreign_key:true|
+|room_id|integer|null:false,foreign_key:true|
 
 ### Association
 belong_to : user <br>

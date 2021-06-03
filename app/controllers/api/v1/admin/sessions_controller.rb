@@ -46,7 +46,6 @@ class Api::V1::Admin::SessionsController < DeviseTokenAuth::RegistrationsControl
       user.save!
 
       yield user if block_given?
-
       render_destroy_success
     else
       render_destroy_error
