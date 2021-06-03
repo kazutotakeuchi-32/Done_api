@@ -6,9 +6,10 @@ class Api::V1::RoomsController < ApplicationController
     rooms=[]
     entries.each do |e|
       other_user=Entry.where(room_id:e.room_id).map{|c|c.user}.select{|us|us.id != user.id}[0]
+      un_read_count=Read.where(user_id:other_user.id,room_id:e.room_id,already_read:false)
       lastMessages=Message.where(room_id:e.room_id).last
       lastMessages=lastMessages ? lastMessages : {message:"まだトーク履歴がありません。",created_at:e.created_at}
-      rooms.push({room:e,user:other_user,lastMessages:lastMessages})
+      rooms.push({room:e,user:other_user,lastMessages:lastMessages,unReadCount:un_read_count})
     end
     # ActionCable.server.broadcast("room_channel",{rooms:rooms})
     rooms.sort!{|a,b|b[:lastMessages][:created_at]<=>a[:lastMessages][:created_at]}

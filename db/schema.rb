@@ -124,10 +124,12 @@ ActiveRecord::Schema.define(version: 2021_05_30_140134) do
   create_table "reads", charset: "utf8mb4", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "message_id", null: false
+    t.bigint "room_id", null: false
     t.boolean "already_read", default: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["message_id"], name: "index_reads_on_message_id"
+    t.index ["room_id"], name: "index_reads_on_room_id"
     t.index ["user_id"], name: "index_reads_on_user_id"
   end
 
@@ -191,6 +193,7 @@ ActiveRecord::Schema.define(version: 2021_05_30_140134) do
   add_foreign_key "messages", "rooms"
   add_foreign_key "messages", "users"
   add_foreign_key "reads", "messages"
+  add_foreign_key "reads", "rooms"
   add_foreign_key "reads", "users"
   add_foreign_key "relationships", "users"
   add_foreign_key "relationships", "users", column: "follow_id"
