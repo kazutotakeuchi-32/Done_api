@@ -141,7 +141,9 @@ Column|Type|Options|
 |follow_id|integer|null:false,foreign_key:true,optional: true|
 |message_id|integer|null:false,foreign_key:true,optional: true|
 ### Association
-belong_to : user <br>
-belong_to : message<br>
-belong_to : like<br>
+belongs_to :sender, class_name: 'User', foreign_key: 'sender_id', optional: true <br>
+belongs_to :receiver, class_name: 'User', foreign_key: 'receiver_id', optional: true<br>
+belong_to : message , optional: true<br>
+belong_to : like    , optional: true<br>
+<!-- belong_to : relationship , optional: true<br> -->
 <!-- belong_to : relationship -->
