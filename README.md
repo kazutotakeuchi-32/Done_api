@@ -26,7 +26,9 @@ has_many :relationships<br>
 has_many :followings,through: :relationships, source: :follow<br>
 has_many :reverse_of_relationships,class_name: 'Relationship',foreign_key: :follow_id<br>
 has_many :followers,through: :reverse_of_relationships,source: :user<br>
-has_many :reads
+has_many :reads<br>
+has_many :sender_notifications, class_name: "Notification", foreign_key: "sender_id", dependent: :destroy<br>
+has_many :receiver_notifications, class_name: "Notification", foreign_key: "receiver_id", dependent: :destroy
 
 <!-- has_many :notifications -->
 
@@ -127,7 +129,7 @@ Column|Type|Options|
 belong_to : user <br>
 belong_to : message
 
-<!-- ### Notificationsテーブル
+### Notificationsテーブル
 Column|Type|Options|
 |------|----|-------|
 |id|integer|null:false|
@@ -142,4 +144,4 @@ Column|Type|Options|
 belong_to : user <br>
 belong_to : message<br>
 belong_to : like<br>
-belong_to : relationship -->
+<!-- belong_to : relationship -->

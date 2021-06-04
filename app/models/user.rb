@@ -22,6 +22,7 @@ class User < ActiveRecord::Base
   has_many :reads
 
 
+
   def follow(other_user)
     if self.id != other_user.id
       self.relationships.find_or_create_by(follow_id:other_user.id)
