@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_30_140134) do
+ActiveRecord::Schema.define(version: 2021_06_04_023921) do
 
   create_table "active_storage_attachments", charset: "utf8mb4", force: :cascade do |t|
     t.string "name", null: false
@@ -121,6 +121,21 @@ ActiveRecord::Schema.define(version: 2021_05_30_140134) do
     t.index ["user_id"], name: "index_messages_on_user_id"
   end
 
+  create_table "notifications", charset: "utf8mb4", force: :cascade do |t|
+    t.string "kind", null: false
+    t.boolean "checked", default: false, null: false
+    t.bigint "sender_id"
+    t.bigint "receiver_id"
+    t.integer "message_id"
+    t.integer "learn_id"
+    t.integer "draft_learn_id"
+    t.integer "follow_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["receiver_id"], name: "index_notifications_on_receiver_id"
+    t.index ["sender_id"], name: "index_notifications_on_sender_id"
+  end
+
   create_table "reads", charset: "utf8mb4", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "message_id", null: false
@@ -192,6 +207,8 @@ ActiveRecord::Schema.define(version: 2021_05_30_140134) do
   add_foreign_key "likes", "users"
   add_foreign_key "messages", "rooms"
   add_foreign_key "messages", "users"
+  add_foreign_key "notifications", "users", column: "receiver_id"
+  add_foreign_key "notifications", "users", column: "sender_id"
   add_foreign_key "reads", "messages"
   add_foreign_key "reads", "rooms"
   add_foreign_key "reads", "users"

@@ -1,4 +1,3 @@
-
 class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
@@ -20,8 +19,8 @@ class User < ActiveRecord::Base
   has_many :reverse_of_relationships,class_name: 'Relationship',foreign_key: :follow_id
   has_many :followers,through: :reverse_of_relationships,source: :user
   has_many :reads
-
-
+  has_many :sender_notifications, class_name: "Notification", foreign_key: "sender_id", dependent: :destroy
+  has_many :receiver_notifications, class_name: "Notification", foreign_key: "receiver_id", dependent: :destroy
 
   def follow(other_user)
     if self.id != other_user.id

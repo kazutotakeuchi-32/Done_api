@@ -12,6 +12,7 @@ Rails.application.routes.draw do
           resources :messages,only:[:create,:index]
           resources :reads,only:[:update]
         end
+        resources :notifications,only:[:index,:update]
         member do
           get :learn_search
           get :draft_search
