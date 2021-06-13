@@ -32,7 +32,7 @@ RSpec.describe User, type: :model do
 
       it "emailのパターン" do
         ["kazutotakeuchi@gmail.com","kazuto@ezweb.ne.jp","hogehoge@example.com"].each do |email|
-          expect(email).to match(/\A[\w+-.]+@[a-z\d-]+(.[a-z\d-]+)*.[a-z]+\z/i)
+          expect(email).to match(/\A[\w+-.]+@[a-z\d-]+(\.[a-z\d-]+)*\.[a-z]+\z/i)
         end
       end
 
@@ -76,7 +76,7 @@ RSpec.describe User, type: :model do
       it "emailのアンチパターン" do
         invalid_emails = ["kazutp..com","kazutotakeuchi@..com","test.com","hoge","kazutotakeuchi@.ff.com"]
         invalid_emails.each do |email|
-          expect(email).not_to match(/\A[\w+-.]+@[a-z\d-]+(.[a-z\d-]+)*.[a-z]+\z/i)
+          expect(email).not_to match(/\A[\w+-.]+@[a-z\d-]+(\.[a-z\d-]+)*\.[a-z]+\z/i)
         end
       end
       it "passwordが6文字以下である" do

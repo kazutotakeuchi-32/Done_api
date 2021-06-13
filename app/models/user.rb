@@ -24,7 +24,7 @@ class User < ActiveRecord::Base
   has_many :receiver_notifications, class_name: "Notification", foreign_key: "receiver_id", dependent: :destroy
 
   # バリデーション
-  VALID_EMAIL_REGEX = /\A[\w+-.]+@[a-z\d-]+(.[a-z\d-]+)*.[a-z]+\z/i
+  VALID_EMAIL_REGEX = /\A[\w+-.]+@[a-z\d-]+(\.[a-z\d-]+)*\.[a-z]+\z/i
 
   validates :name,:password,:email,presence: true
   validates :email,uniqueness: true,format:{with:VALID_EMAIL_REGEX}
