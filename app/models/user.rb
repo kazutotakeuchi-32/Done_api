@@ -1,6 +1,7 @@
 class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  # アソシエーション
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,:confirmable
   include DeviseTokenAuth::Concerns::User
@@ -21,6 +22,13 @@ class User < ActiveRecord::Base
   has_many :reads
   has_many :sender_notifications, class_name: "Notification", foreign_key: "sender_id", dependent: :destroy
   has_many :receiver_notifications, class_name: "Notification", foreign_key: "receiver_id", dependent: :destroy
+
+  # バリデーション
+  VALID_EMAIL_REGEX = /\A[\w+-.]+@[a-z\d-]+(.[a-z\d-]+)*.[a-z]+\z/i
+
+  validates :name,:password,:email,presence: true
+  validates :email,uniqueness: true,format:{with:VALID_EMAIL_REGEX}
+  validates :password,    length: { minimum: 6 }
 
   def follow(other_user)
     if self.id != other_user.id
