@@ -12,6 +12,56 @@
 # the additional setup, and require it from the spec files that actually need
 # it.
 #
+# require 'devise'
+
+
+# module AuthHelper
+#   module Controller
+#     def sign_in(user)
+#       @request.env["devise.mapping"] = Devise.mappings[:merchant]
+#       @request.headers.merge! user.create_new_auth_token
+#       sign_in user
+#     end
+#   end
+
+#   module Request
+#     %i(get post put patch delete).each do |http_method|
+#       # auth_get, auth_post, auth_put, auth_patch, auth_delete
+#       define_method("auth_#{http_method}") do |user, action_name, params: {}, headers: {}|
+#         auth_headers = user.create_new_auth_token
+#         headers = headers.merge(auth_headers)
+#         public_send(http_method, action_name, params: params, headers: headers)
+#       end
+#     end
+#   end
+# end
+
+# module DeviseMapping
+#   extend ActiveSupport::Concern
+
+#   included do
+#     before(:each) do
+#       request.env["devise.mapping"] = Devise.mappings[:user]
+
+#       allow(SecureRandom).to receive(:urlsafe_base64).with(nil, false).and_return("Nbdlw89hmGAd1y1Ch6fhfw")
+#     end
+#   end
+
+#   [:get, :post, :put, :patch, :delete].each do |http_method|
+#     define_method("auth_#{http_method}") do |action_name, params = {}, headers = {}, flash = {}|
+#       auth_params = {
+#         'access-token' => controller.current_user.last_token,
+#         'client' => controller.current_user.last_client_id,
+#         'uid' => controller.current_user.email
+#       }
+#       params = params.merge(auth_params)
+#       public_send(http_method, action_name, params, headers, flash)
+#     end
+#   end
+# end
+
+
+
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
@@ -94,8 +144,6 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 =end
 
-
-
 config.before(:suite) do
   # データベースをCleanする方法を'transaction'に指定
   DatabaseCleaner.strategy = :transaction
@@ -112,6 +160,7 @@ config.around(:each) do |example|
     # ここに処理を記述する ##
   end
 end
-
-
+# config.include AuthHelper::Controller, type: :controller
+# config.include AuthHelper::Request, type: :request
+# config.include DeviseMapping, type: :request
 end

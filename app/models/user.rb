@@ -25,10 +25,11 @@ class User < ActiveRecord::Base
 
   # バリデーション
   VALID_EMAIL_REGEX = /\A[\w+-.]+@[a-z\d-]+(\.[a-z\d-]+)*\.[a-z]+\z/i
-
-  validates :name,:password,:email,presence: true
+  # validates :name,:email,:password,presence: true
+  # validates :password, length: { minimum: 6 }
+  validates :name ,presence: true
   validates :email,uniqueness: true,format:{with:VALID_EMAIL_REGEX}
-  validates :password,    length: { minimum: 6 }
+
 
   def follow(other_user)
     if self.id != other_user.id
