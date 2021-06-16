@@ -59,4 +59,80 @@ RSpec.describe "Api::V1::Auth::Registrations", type: :request do
       end
     end
   end
+
+  describe "アカウント設定" do
+    let(:user) { FactoryBot.create(:other) }
+    before do
+      @params=auth_post user, api_v1_user_session_path, params:{email:user.email,password:"000000"}
+    end
+    describe "PUT /api/v1/auth #update" do
+        context "アカウント設定ができる" do
+          describe "ログインしている" do
+            it "名前を変更できる" do
+              put api_v1_user_registration_path ,params:{name:"jun"},headers:@params[:headers]
+              res = JSON.parse(response.body)
+              expect(response.status).to eq 200
+              expect(res['data']['name']).to include("jun")
+            end
+            it "Emailアドレスを変更できる" do
+              put api_v1_user_registration_path ,params:{email:"jun@gmail.com"},headers:@params[:headers]
+              res = JSON.parse(response.body)
+              expect(response.status).to eq 200
+              expect(res['data']['email']).to include("jun@gmail.com")
+            end
+            it "アバターを変更できる" do
+              put api_v1_user_registration_path ,params:{avatar:"profile.png"},headers:@params[:headers]
+              res = JSON.parse(response.body)
+              expect(response.status).to eq 200
+              expect(res['data']['avatar']).to include("profile.png")
+            end
+            it "全て変更できる" do
+              put api_v1_user_registration_path ,params:{name:"jun",email:"jun@gmail.com",avatar:"profile.png"},headers:@params[:headers]
+              res = JSON.parse(response.body)
+              expect(response.status).to eq 200
+              expect(res['data']['name']).to include("jun")
+              expect(res['data']['email']).to include("jun@gmail.com")
+              expect(res['data']['avatar']).to include("profile.png")
+            end
+            context "ログインしてから14日以内" do
+              around do |e|
+                travel_to('2021-2-29 10:00'.to_time){ e.run }
+              end
+              it "14日以内であれば変更できる" do
+                travel 13.day
+                put api_v1_user_registration_path ,params:{name:"jun"},headers:@params[:headers]
+                res = JSON.parse(response.body)
+                expect(response.status).to eq 200
+                expect(res['data']['name']).to include("jun")
+              end
+            end
+          end
+        end
+        context "アカウント設定ができない" do
+          describe "ログインしていない" do
+            it "ログインしていないユーザはアカウント設定できない" do
+              other_user=FactoryBot.create(:no_login_user)
+              put api_v1_user_registration_path ,params:{name:"jun",email:"jun@gmail.com",avatar:"profile.png"},headers:{}
+              expect(response.status).to eq 404
+              res = JSON.parse(response.body)
+              expect(res['errors']).to include("ユーザーが見つかりません。")
+            end
+          end
+          describe "ログインしている" do
+            context "ログインしてから14日後" do
+              around do |e|
+                travel_to('2021-2-29 10:00'.to_time){ e.run }
+              end
+              it "14日を過ぎるとログアウトできない" do
+                travel 14.day
+                put api_v1_user_registration_path ,params:{name:"jun"},headers:@params[:headers]
+                res = JSON.parse(response.body)
+                expect(response.status).to eq(404)
+                expect(res['errors']).to include("ユーザーが見つかりません。")
+              end
+            end
+          end
+       end
+    end
+  end
 end
