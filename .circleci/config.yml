@@ -6,10 +6,13 @@ jobs:
   build:
     docker:
       - image: circleci/ruby:2.6-rc-stretch
-    executor: ruby/default
+    working_directory: ~/Done_api
     steps:
-      - checkout
-      - run:
-          name: Which bundler?
-          command: bundle -v
-      - ruby/bundle-install
+      - checkout:
+        path: ~/Done_api
+      - ruby/install-deps
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
