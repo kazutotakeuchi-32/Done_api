@@ -10,7 +10,7 @@ jobs:
     steps:
       - checkout:
         path: ~/Done_api
-      - ruby/install-deps
+      - ruby/bundle-install
 workflows:
   version: 2
   build_and_test:
