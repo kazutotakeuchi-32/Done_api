@@ -10,6 +10,9 @@ jobs:
     steps:
       - checkout:
         path: ~/Done_api
+      - run:
+          name: Which bundler?
+          command: bundle -v
       - ruby/bundle-install
 workflows:
   version: 2
