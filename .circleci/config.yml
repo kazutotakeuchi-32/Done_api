@@ -28,9 +28,9 @@ jobs:
       - checkout:
           path: ~/Done_api
       - ruby/install-deps
-      - run:
-          name: Database setup
-          command: bundle exec rails db:migrate
+      # - run:
+      #     name: Database setup
+      #     command: bundle exec rails db:migrate
       - run:
           name: rspec test
           command: bundle exec rspec
