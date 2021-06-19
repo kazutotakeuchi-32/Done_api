@@ -5,8 +5,7 @@ jobs:
   build:
     docker:
       - image: circleci/ruby:2.6-rc-stretch
-    working_directory: ~/Done_api
-    # executor: ruby/default
+    working_directory: ~/Done_api/app
     steps:
       - checkout:
         path: ~/Done_api
