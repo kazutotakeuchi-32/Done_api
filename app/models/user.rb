@@ -133,7 +133,7 @@ class User < ActiveRecord::Base
           time+=d.time
           i+=1
         end
-        # strings1.push({user:users.find{|user|user.id==user_id}, data:string1+"\n学習計画(時):#{time}",data:string1+"\n学習計画(時):#{time}",likes:draft[draft.size-1].likes})
+        strings1.push({user:users.find{|user|user.id==user_id}, data:string1+"\n学習計画(時):#{time}",data:string1+"\n学習計画(時):#{time}",likes:draft[draft.size-1].likes})
       end
       strings2=[]
       if learn
