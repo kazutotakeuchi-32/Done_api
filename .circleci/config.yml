@@ -1,20 +1,16 @@
 version: 2.1
 orbs:
   ruby: circleci/ruby@1.1.2
-
 jobs:
   build:
     docker:
       - image: circleci/ruby:2.6-rc-stretch
     working_directory: ~/Done_api
-    executor: ruby/default
+    # executor: ruby/default
     steps:
       - checkout:
         path: ~/Done_api
-      - run:
-          name: Which bundler?
-          command: bundle -v
-      - ruby/bundle-install
+      - ruby/install-deps
 workflows:
   version: 2
   build_and_test:
