@@ -7,9 +7,9 @@ jobs:
       - image: circleci/ruby:2.6-rc-stretch
     working_directory: ~/Done_api/app
     steps:
-      - checkout:
-          path: ~/Done_api
-      - ruby/install-deps
+    - checkout:
+        path: ~/Done_api
+    - ruby/install-deps
 workflows:
   version: 2
   build_and_test:
