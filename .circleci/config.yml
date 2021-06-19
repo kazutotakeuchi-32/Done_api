@@ -10,8 +10,35 @@ jobs:
     - checkout:
         path: ~/Done_api
     - ruby/install-deps
+  test:
+    docker:
+      - image: circleci/ruby:2.6-rc-stretch
+      - image: circleci/mysql:5.7
+      environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: app_test
+        MYSQL_USER: root
+    environment:
+        BUNDLE_JOBS: "3"
+        BUNDLE_RETRY: "3"
+        APP_DATABASE_HOST: "127.0.0.1"
+        RAILS_ENV: test
+      working_directory: ~/Done_api/
+      steps:
+      - checkout:
+          path: ~/Done_api
+      - ruby/install-deps
+      - run:
+          name: Database setup
+          command: bundle exec rails db:migrate
+      - run:
+          name: rspec test
+          command: bundle exec rspec
 workflows:
   version: 2
   build_and_test:
     jobs:
       - build
+      - test
+        requires:
+            - build
