@@ -8,7 +8,7 @@ jobs:
     working_directory: ~/Done_api/app
     steps:
       - checkout:
-        path: ~/Done_api
+          path: ~/Done_api
       - ruby/install-deps
 workflows:
   version: 2
