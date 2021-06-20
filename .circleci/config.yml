@@ -30,7 +30,6 @@ jobs:
       - ruby/install-deps
       - run:
           name: Database setup
-          command: sleep 15
           # command: bundle exec rails db:migrate RAILS_ENV=test
           command: bundle exec rails db:migrate
           # command: bundle exec rails db:schema:load
