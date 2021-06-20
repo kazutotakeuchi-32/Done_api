@@ -33,9 +33,7 @@ jobs:
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
       - run:
           name: Database setup
-          # command: bundle exec rails db:migrate RAILS_ENV=test
           command: bundle exec rails db:migrate
-          # command: bundle exec rails db:schema:load
       - run:
           name: rspec test
           command: bundle exec rspec
