@@ -2,6 +2,7 @@ module GetLearnData
   extend ActiveSupport::Concern
   included do
     scope :date_range,->(from,to){where("created_at >= ? and created_at <= ?",from,to)}
+    validates :title,:content,:subject,:time,presence: true
     def self.get_draft_learn_data(type,year,month,day)
       from=Time.now.ago(6.days).beginning_of_day
       to=Time.now.end_of_day
