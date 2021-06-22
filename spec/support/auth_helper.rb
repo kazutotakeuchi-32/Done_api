@@ -14,7 +14,6 @@ module AuthHelper
         auth_headers = user.create_new_auth_token
         headers = headers.merge(auth_headers)
         public_send(http_method, action_name, params: params, headers: headers)
-        p status
         {params:params, headers: headers,status:status}
       end
     end
