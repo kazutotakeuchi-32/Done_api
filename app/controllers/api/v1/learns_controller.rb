@@ -25,7 +25,7 @@ class Api::V1::LearnsController < ApplicationController
           }
          },status:200
       else
-        render json:{data:{}},status:401
+        render json:{data:{},errors:learn.errors.full_messages},status:401
      end
   end
 
