@@ -4,7 +4,7 @@ RSpec.describe "Api::V1::Auth::Registrations", type: :request do
   describe "アカウント登録" do
     describe "POST /api/v1/auth #create" do
       context "アカウント登録に成功する" do
-        subject { post(api_v1_user_registration_path, params: params) }
+        subject {post(api_v1_user_registration_path, params: params) }
         it "全カラムの値が正しい" do
           subject
           expect(response.status).to eq 200
