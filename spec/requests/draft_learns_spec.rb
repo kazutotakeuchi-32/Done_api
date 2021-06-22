@@ -1,5 +1,4 @@
 require 'rails_helper'
-
 RSpec.describe "DraftLearns", type: :request do
   let(:user) { FactoryBot.create(:other) }
   let(:draft_learn){FactoryBot.build(:draft_learn,user_id:user.id)}
@@ -29,7 +28,7 @@ RSpec.describe "DraftLearns", type: :request do
               res = JSON.parse(response.body)
             expect(res['data']['message']).to include "OK"
           end
-          it "ステータスコード200が返ってきる" do
+          it "ステータスコード200が返ってくる" do
             post(api_v1_draft_learns_path ,params:{draft_learn:@draft_learn_params},headers:@params[:headers])
             expect(response.status).to eq 200
           end
@@ -58,18 +57,26 @@ RSpec.describe "DraftLearns", type: :request do
           it "タスク名が入力されていない" do
             post(api_v1_draft_learns_path ,params:{draft_learn:@draft_learn_params.merge(title:nil)},headers:@params[:headers])
             expect( response.status).to eq(401)
+            res = JSON.parse(response.body)
+            expect(res['errors']).to include("Titleを入力してください")
           end
           it "学習時間が入力されていない" do
             post(api_v1_draft_learns_path ,params:{draft_learn:@draft_learn_params.merge(time:nil)},headers:@params[:headers])
             expect( response.status).to eq(401)
+            res = JSON.parse(response.body)
+            expect(res['errors']).to include("Timeを入力してください")
           end
           it "学習内容が入力されていない" do
             post(api_v1_draft_learns_path ,params:{draft_learn:@draft_learn_params.merge(content:nil)},headers:@params[:headers])
             expect( response.status).to eq(401)
+            res = JSON.parse(response.body)
+            expect(res['errors']).to include("Contentを入力してください")
           end
           it "カテゴリーが入力されていない" do
             post(api_v1_draft_learns_path ,params:{draft_learn:@draft_learn_params.merge(subject:nil)},headers:@params[:headers])
             expect( response.status).to eq(401)
+            res = JSON.parse(response.body)
+            expect(res['errors']).to include("Subjectを入力してください")
           end
           context "ログインしてから14日が過ぎた場合" do
             around do |e|

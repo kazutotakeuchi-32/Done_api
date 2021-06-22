@@ -25,7 +25,8 @@ class Api::V1::DraftLearnsController < ApplicationController
           }
          },status:200
       else
-        render json:{data:{}},status:401
+
+        render json:{data:{},errors:draft_learn.errors.full_messages},status:401
      end
   end
 
