@@ -87,4 +87,6 @@ RSpec.describe Learn, type: :model do
       end
     end
   end
+  describe "分析機能" do
+  end
 end
