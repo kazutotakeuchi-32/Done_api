@@ -4,6 +4,7 @@ class Api::V1::UsersController < ApplicationController
   before_action :set_draft_learns, only: [:show, :learn_search,:draft_search]
   before_action :set_learns, only: [:show, :learn_search,:draft_search]
   def show
+    return render json:{data:{},errors:["ユーザが存在しません"]},status:401 if !@user
     model_class=[{model:DraftLearn},{model:Learn}]
     draft_learn_next_tasks,draft_learn_next_tasks_title,draft_learn_previous_tasks,draft_learn_previous_tasks_title = get_learn_data(model_class[0],@draft_learns)
     learn_next_tasks,learn_next_tasks_title,learn_previous_tasks,learn_previous_tasks_title = get_learn_data(model_class[1],@learns)
@@ -158,10 +159,12 @@ class Api::V1::UsersController < ApplicationController
     end
 
     def set_draft_learns
+      return if !@user
       @draft_learns = @user.draft_learns
     end
 
     def set_learns
+      return if !@user
       @learns = @user.learns
     end
 
