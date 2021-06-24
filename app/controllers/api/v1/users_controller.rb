@@ -186,7 +186,7 @@ class Api::V1::UsersController < ApplicationController
     end
 
     def get_learn_data(model_class,learns)
-      from,to = model_class[:model].get_draft_learn_data(@type,@year,@month,@day)
+      from,to = model_class[:model].get_start_and_end_time(@type,@year,@month,@day)
       previous_tasks  = model_class[:model].aggregation_data(@type,from,to,@year,@month,@day,learns)
       next_tasks  = learns.select{|l|l if l.created_at.to_s >= Date.today.to_s}.sort{|a,b| a.created_at.to_i<=>b.created_at.to_i}
       next_tasks_title = graph_title_next_format()
@@ -195,7 +195,7 @@ class Api::V1::UsersController < ApplicationController
     end
 
    def search_learn_data(model_class,learns)
-      from,to =   model_class[:model].get_draft_learn_data(@type,@year,@month,@day)
+      from,to =   model_class[:model].get_start_and_end_time(@type,@year,@month,@day)
       data    =   learns.date_range(from.beginning_of_day,to.end_of_day)
       search_learn_task_title = graph_title_previous_format(from,to)
       return data,search_learn_task_title
