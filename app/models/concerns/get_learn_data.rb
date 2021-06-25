@@ -3,13 +3,15 @@ module GetLearnData
   included do
     scope :date_range,->(from,to){where("created_at >= ? and created_at <= ?",from,to)}
     validates :title,:content,:subject,:time,presence: true
-    def self.get_draft_learn_data(type,year,month,day)
+    def self.get_start_and_end_time(type,year,month,day)
       from=Time.now.ago(6.days).beginning_of_day
       to=Time.now.end_of_day
       case type
         when "year"
           from = Time.new(year,month  )
-          to = from.since(11.month)
+          to = from.since(11.month).end_of_month
+          # to = from.since(11.month)
+          #  to=from.since(1.year)
           # to   = from.end_of_year
           # Time.new.since(11.month)
         when "6months"
@@ -23,9 +25,8 @@ module GetLearnData
           if day.to_i== 1
             # p Time.new(year,month,day) > Time.now.ago(1.month)
             if Time.new(year,month) > Time.now.ago(1.month)
-
-              to   =  Time.new(year,month).ago(1.days)
-              from =  to.ago(1.month).since(1.days)
+              to   =  Time.new(year,month).ago(1.days).end_of_day
+              from =  to.ago(1.month).since(1.days).beginning_of_day
             else
               from = Time.new(year,month)
               to   = from.end_of_month
@@ -36,11 +37,11 @@ module GetLearnData
             # to   = from.end_of_month
           else
             if Time.new(year,month) > Time.now.ago(1.month)
-              to   =  Time.new(year,month,day)
-              from =  to.ago(1.month).since(1.days)
+              to   =  Time.new(year,month,day).end_of_day
+              from =  to.ago(1.month).since(1.days).beginning_of_day
             else
               from = Time.new(year,month,day)
-              to = from.since(1.month).ago(1.days)
+              to = from.since(1.month).ago(1.days).end_of_day
             end
 
           end
@@ -48,10 +49,10 @@ module GetLearnData
         when "week"
           if Time.new(year,month,day) < Time.now.ago(6.days).beginning_of_day
             from = Time.new(year,month,day)
-            to = from.since(6.days)
+            to = from.since(6.days).end_of_day
           else
-            to    = Time.new(year,month,day)
-            from  = to.ago(6.days)
+            to    = Time.new(year,month,day).end_of_day
+            from  = to.ago(6.days).beginning_of_day
           end
           # Time.new(year,month,day)
         when "day"
