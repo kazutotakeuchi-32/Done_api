@@ -1,8 +1,8 @@
 class Api::V1::UsersController < ApplicationController
-  before_action :set_date, only: [:show, :learn_search,:draft_search]
-  before_action :set_user, only: [:show, :learn_search,:draft_search,:follows,:followers,:time_line,:mutual_following]
-  before_action :set_draft_learns, only: [:show, :learn_search,:draft_search]
-  before_action :set_learns, only: [:show, :learn_search,:draft_search]
+  before_action :set_date, only: [:show, :pie_graph,:bar_graph]
+  before_action :set_user, only: [:show, :pie_graph,:bar_graph,:follows,:followers,:time_line,:mutual_following]
+  before_action :set_draft_learns, only: [:show, :pie_graph,:bar_graph]
+  before_action :set_learns, only: [:show, :pie_graph,:bar_graph]
   def show
     return render json:{data:{},errors:["ユーザが存在しません"]},status:401 if !@user
     model_class=[{model:DraftLearn},{model:Learn}]
@@ -49,7 +49,7 @@ class Api::V1::UsersController < ApplicationController
     }
   end
 
-  def learn_search
+  def pie_graph
     model_class=[{model:DraftLearn},{model:Learn}]
     draft_learn_data,draft_learn_title = search_learn_data(model_class[0],@draft_learns)
     learn_data,learn_title = search_learn_data(model_class[1],@learns)
@@ -71,7 +71,7 @@ class Api::V1::UsersController < ApplicationController
     },status:200
   end
 
-  def draft_search
+  def bar_graph
     model_class=[{model:DraftLearn},{model:Learn}]
     draft_learn_next_tasks,draft_learn_next_tasks_title,draft_learn_previous_tasks,draft_learn_previous_tasks_title = get_learn_data(model_class[0],@draft_learns)
     learn_next_tasks,learn_next_tasks_title,learn_previous_tasks,learn_previous_tasks_title = get_learn_data(model_class[1],@learns)
