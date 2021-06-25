@@ -160,6 +160,20 @@ config.around(:each) do |example|
     # ここに処理を記述する ##
   end
 end
+
+def create_spec_table(name,&block)
+  before(:all) do
+    m = ActiveRecord::Migration.new
+    m.verbose = false
+    m.create_table name, &block
+  end
+  after(:all) do
+    m = ActiveRecord::Migration.new
+    m.verbose = false
+    m.drop_table name
+  end
+end
+
 # config.include AuthHelper::Controller, type: :controller
 # config.include AuthHelper::Request, type: :request
 # config.include DeviseMapping, type: :request

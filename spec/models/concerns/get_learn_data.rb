@@ -1,43 +1,18 @@
 require 'rails_helper'
 RSpec.describe   type: :model do
-  before(:all) do
-    m = ActiveRecord::Migration.new
-    m.verbose = false
-    m.create_table :get_learn_data_tests do |t|
-      t.string  :title,null: false
-      t.string  :content,null: false
-      t.string  :subject,null: false
-      t.integer :time,null: false
-      t.integer :user_id,null:false
-      t.timestamps
-    end
-    100.times do |n|
-      get_learn_data_test=GetLearnDataTest.new({id: nil, title: "test#{n}", content: "test#{n}", subject: "", time: rand(6), user_id: 1, created_at: nil, updated_at: nil})
-      subject=rand(5)
-      case subject
-        when 1
-          get_learn_data_test.subject="プログラミング"
-        when 2
-          get_learn_data_test.subject="英語"
-        when 3
-          get_learn_data_test.subject="資格"
-        when 4
-          get_learn_data_test.subject="その他"
-      end
-      get_learn_data_test.save
-      get_learn_data_test.created_at=Date.today-rand(365).days
-      get_learn_data_test.save
-    end
-  end
-  after(:all) do
-    m = ActiveRecord::Migration.new
-    m.verbose = false
-    m.drop_table :get_learn_data_tests
+  create_spec_table :get_learn_data_tests do |t|
+    t.string  :title,null: false
+    t.string  :content,null: false
+    t.string  :subject,null: false
+    t.integer :time,null: false
+    t.integer :user_id,null:false
+    t.timestamps
   end
 
   class GetLearnDataTest < ApplicationRecord
     include GetLearnData
   end
+
   let(:user){FactoryBot.create(:user)}
   let(:other_user){FactoryBot.create(:other)}
 
@@ -45,6 +20,7 @@ RSpec.describe   type: :model do
     describe "get_start_and_end_time(集計する開始日、終了日を特定)" do
       context "一年単位で集計する場合(type=year)" do
         it "2020/4/１が開始日な場合は2020/4/1~2020/3/31まで" do
+          GetLearnDataTest.all.each{|s|puts "#{s.title}\n#{s.content}"}
            from,to=GetLearnDataTest.get_start_and_end_time("year","2020","4","1")
            expect(from).to eq Time.new("2020","4","1")
            expect(to).to eq Time.new("2021","3","31").end_of_day
@@ -151,27 +127,117 @@ RSpec.describe   type: :model do
       end
     end
     describe "aggregation_data(開始日~終了日を日付けごとに集計)" do
-      before do
-      end
-      context "一年単位で集計する場合(type=years)" do
-        it "" do
+      before  do
+        365.times do |n|
+          get_learn_data_test=GetLearnDataTest.new({id: nil, title: "test#{n}", content: "content#{n}", subject: "", time: 1, user_id: 1, created_at: nil, updated_at: nil})
+          subject=rand(4)
+          case subject
+            when 0
+              get_learn_data_test.subject="プログラミング"
+            when 1
+              get_learn_data_test.subject="英語"
+            when 2
+              get_learn_data_test.subject="資格"
+            when 3
+              get_learn_data_test.subject="その他"
+          end
+          get_learn_data_test.created_at=Time.new("2020","1","1").since(n.day)
+          get_learn_data_test.save!
         end
       end
+      let(:get_learn_datas){GetLearnDataTest.all}
+
+      context "一年単位で集計する場合(type=years)" do
+        context "2020/1/1~12/31" do
+          it "12ヶ月分(月)のデータが存在する" do
+            from,to = GetLearnDataTest.get_start_and_end_time("year","2020","1","1")
+            output  = GetLearnDataTest.aggregation_data("year",from,to,"2020","1","1",get_learn_datas)
+            expect(output.length).to eq 12
+          end
+          it "学習時間の合計は365時間である" do
+            from,to = GetLearnDataTest.get_start_and_end_time("year","2020","1","1")
+            output  = GetLearnDataTest.aggregation_data("year",from,to,"2020","1","1",get_learn_datas)
+            total_time = output.sum { |o| o[:data]}
+            expect(total_time).to eq 365
+          end
+        end
+      end
+
       context "6ヶ月単位で集計する場合(type=6months)" do
-        it "" do
+        context "2020/1/1~6/30" do
+          it "6ヶ月分(月)のデータが存在する" do
+            from,to = GetLearnDataTest.get_start_and_end_time("6months","2020","1","1")
+            output  = GetLearnDataTest.aggregation_data("6months",from,to,"2020","1","1",get_learn_datas)
+            expect(output.length).to eq 6
+          end
+          it "学習時間の合計は182時間である" do
+            from,to = GetLearnDataTest.get_start_and_end_time("6months","2020","1","1")
+            output  = GetLearnDataTest.aggregation_data("6months",from,to,"2020","1","1",get_learn_datas)
+            total_time = output.sum { |o| o[:data]}
+            expect(total_time).to eq 182
+          end
         end
       end
       context "3ヶ月単位で集計する場合(type=3months)" do
-        it "" do
+        context "2020/1/1~3/31" do
+          it "3ヶ月分(月)のデータが存在する" do
+            from,to = GetLearnDataTest.get_start_and_end_time("3months","2020","1","1")
+            output  = GetLearnDataTest.aggregation_data("3months",from,to,"2020","1","1",get_learn_datas)
+            expect(output.length).to eq 3
+          end
+          it "学習時間の合計は182時間である" do
+            from,to = GetLearnDataTest.get_start_and_end_time("3months","2020","1","1")
+            output  = GetLearnDataTest.aggregation_data("3months",from,to,"2020","1","1",get_learn_datas)
+            total_time = output.sum { |o| o[:data]}
+            expect(total_time).to eq 91
+          end
         end
       end
       context "１ヶ月単位で集計する場合(type=month)" do
+        context "2020/1/1~3/31" do
+          it "31日分(日)のデータが存在する" do
+            from,to = GetLearnDataTest.get_start_and_end_time("month","2020","1","1")
+            output  = GetLearnDataTest.aggregation_data("month",from,to,"2020","1","1",get_learn_datas)
+            expect(output.length).to eq 31
+          end
+          it "学習時間の合計は31時間である" do
+            from,to = GetLearnDataTest.get_start_and_end_time("month","2020","1","1")
+            output  = GetLearnDataTest.aggregation_data("month",from,to,"2020","1","1",get_learn_datas)
+            total_time = output.sum { |o| o[:data]}
+            expect(total_time).to eq 31
+          end
+        end
       end
       context "1週間単位で集計する場合"do
+        context "2020/1/1~1/7" do
+          it "7日分(日)のデータが存在する" do
+            from,to = GetLearnDataTest.get_start_and_end_time("week","2020","1","1")
+            output  = GetLearnDataTest.aggregation_data("week",from,to,"2020","1","1",get_learn_datas)
+            expect(output.length).to eq 7
+          end
+          it "学習時間の合計は7時間である" do
+            from,to = GetLearnDataTest.get_start_and_end_time("week","2020","1","1")
+            output  = GetLearnDataTest.aggregation_data("week",from,to,"2020","1","1",get_learn_datas)
+            total_time = output.sum { |o| o[:data]}
+            expect(total_time).to eq 7
+          end
+        end
       end
       context "1日単位で集計する場合" do
+        context "2020/1/1 00:00:00~23:59:59" do
+          it "1日分(日)のデータが存在する" do
+            from,to = GetLearnDataTest.get_start_and_end_time("day","2020","1","1")
+            output  = GetLearnDataTest.aggregation_data("day",from,to,"2020","1","1",get_learn_datas)
+            expect(output.length).to eq 1
+          end
+          it "学習時間の合計は1時間である" do
+            from,to = GetLearnDataTest.get_start_and_end_time("day","2020","1","1")
+            output  = GetLearnDataTest.aggregation_data("day",from,to,"2020","1","1",get_learn_datas)
+            total_time = output.sum { |o| o[:data]}
+            expect(total_time).to eq 1
+          end
+        end
       end
     end
   end
-
 end
