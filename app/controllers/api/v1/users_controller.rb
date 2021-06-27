@@ -40,7 +40,8 @@ class Api::V1::UsersController < ApplicationController
   def search
     return render json:{data:{users:[] }} if params[:search].blank? || params[:search]==nil
     # users = User.where("name LIKE ? ","%#{params[:search]}%")
-    users = User.where("name LIKE ? AND id!=?","%#{params[:search]}%",params[:id])
+    # where("name LIKE ? AND id!=?","%#{params[:search]}%",params[:id])
+    users = User.search(params[:keyword],params[:id])
     render json:{
       data:{
        users:users,
