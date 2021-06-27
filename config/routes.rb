@@ -14,8 +14,8 @@ Rails.application.routes.draw do
         end
         resources :notifications,only:[:index,:update]
         member do
-          get :learn_search
-          get :draft_search
+          get :pie_graph
+          get :bar_graph
           get :follows
           get :followers
           get :mutual_following

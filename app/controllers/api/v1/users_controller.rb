@@ -1,8 +1,8 @@
 class Api::V1::UsersController < ApplicationController
-  before_action :set_date, only: [:show, :learn_search,:draft_search]
-  before_action :set_user, only: [:show, :learn_search,:draft_search,:follows,:followers,:time_line,:mutual_following]
-  before_action :set_draft_learns, only: [:show, :learn_search,:draft_search]
-  before_action :set_learns, only: [:show, :learn_search,:draft_search]
+  before_action :set_date, only: [:show, :pie_graph,:bar_graph]
+  before_action :set_user, only: [:show, :pie_graph,:bar_graph,:follows,:followers,:time_line,:mutual_following]
+  before_action :set_draft_learns, only: [:show, :pie_graph,:bar_graph]
+  before_action :set_learns, only: [:show, :pie_graph,:bar_graph]
   def show
     return render json:{data:{},errors:["ユーザが存在しません"]},status:401 if !@user
     model_class=[{model:DraftLearn},{model:Learn}]
@@ -49,10 +49,10 @@ class Api::V1::UsersController < ApplicationController
     }
   end
 
-  def learn_search
+  def pie_graph
     model_class=[{model:DraftLearn},{model:Learn}]
-    draft_learn_data,draft_learn_title = search_learn_data(model_class[0],@draft_learns)
-    learn_data,learn_title = search_learn_data(model_class[1],@learns)
+    draft_learn_data,draft_learn_title = get_pie_data(model_class[0],@draft_learns)
+    learn_data,learn_title = get_pie_data(model_class[1],@learns)
     render json:{
       data:{
         draftLearns:{
@@ -71,7 +71,7 @@ class Api::V1::UsersController < ApplicationController
     },status:200
   end
 
-  def draft_search
+  def bar_graph
     model_class=[{model:DraftLearn},{model:Learn}]
     draft_learn_next_tasks,draft_learn_next_tasks_title,draft_learn_previous_tasks,draft_learn_previous_tasks_title = get_learn_data(model_class[0],@draft_learns)
     learn_next_tasks,learn_next_tasks_title,learn_previous_tasks,learn_previous_tasks_title = get_learn_data(model_class[1],@learns)
@@ -168,15 +168,16 @@ class Api::V1::UsersController < ApplicationController
       @learns = @user.learns
     end
 
-    def graph_title_previous_format(from,to)
+    def graph_title_previous_format(from,to,str="学習状況")
       from.month > to.month ?
-            " #{from.year}年#{from.month}月#{from.day}日~#{to.year}年#{to.month}月#{to.day}日の学習状況"
+            "#{from.year}年#{from.month}月#{from.day}日~#{to.year}年#{to.month}月#{to.day}日の#{str}"
             :
             from.day != to.day ?
-              " #{from.year}年#{from.month}月#{from.day}日~#{to.month}月#{to.day}日の学習状況"
+              "#{from.year}年#{from.month}月#{from.day}日~#{to.month}月#{to.day}日の#{str}"
               :
-              "#{from.year}年#{from.month}月#{from.day}日の学習状況"
+              "#{from.year}年#{from.month}月#{from.day}日の#{str}"
     end
+
 
     def graph_title_next_format()
       Time.now.day == @day.to_i ?
@@ -194,10 +195,13 @@ class Api::V1::UsersController < ApplicationController
       return next_tasks,next_tasks_title,previous_tasks,previous_tasks_title
     end
 
-   def search_learn_data(model_class,learns)
+   def get_pie_data(model_class,learns)
       from,to =   model_class[:model].get_start_and_end_time(@type,@year,@month,@day)
       data    =   learns.date_range(from.beginning_of_day,to.end_of_day)
-      search_learn_task_title = graph_title_previous_format(from,to)
+      search_learn_task_title = model_class[:model] == DraftLearn ?
+        graph_title_previous_format(from,to,"学習予定")
+        :
+        graph_title_previous_format(from,to)
       return data,search_learn_task_title
    end
 
