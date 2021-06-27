@@ -628,5 +628,14 @@ RSpec.describe "Users", type: :request do
         end
       end
     end
+    describe "ユーザ検索" do
+      before do
+        10.times do |n|
+          FactoryBot.create(:"test_user#{n+1}")
+        end
+      end
+      describe "get /api/v1/users/search?search=" do
+      end
+    end
   end
 end
