@@ -113,26 +113,106 @@ RSpec.describe User, type: :model do
       end
     end
   end
+
+  describe "ユーザ検索機能" do
+    """
+    テストユーザ名
+    田村悠人
+    田村仁
+    鈴木龍弥
+    鈴木純也
+    鈴木
+    竹内和人
+    jun
+    ryo
+    yui
+    """
+    before do
+      10.times do |n|
+        FactoryBot.create(:"test_user#{n+1}")
+      end
+    end
+    let(:current_user){User.find_by(name:"竹内和人")}
+    context "検索がヒットする場合" do
+        describe "「鈴木」と検索" do
+          subject{User.search("鈴木",current_user.id)}
+          it "3名のユーザがヒットする" do
+            result=subject
+            expect(result.size).to eq(3)
+          end
+          it "鈴木,鈴木龍弥,鈴木純也が含まれる" do
+            result=subject
+            ary=result.map{|user|user.name}
+            expect(ary).to include("鈴木","鈴木龍弥","鈴木純也")
+          end
+          it "ログインユーザは含まれない" do
+            result=subject
+            ary=result.map{|user|user.name}
+            expect(ary).not_to include(current_user.name)
+          end
+          it "田村悠人は含まれない" do
+            result=subject
+            ary=result.map{|user|user.name}
+            expect(ary).not_to include("田村悠人")
+          end
+        end
+        describe "「鈴木純也」と検索" do
+          subject{User.search("鈴木純也",current_user.id)}
+          it "1名のユーザがヒットする" do
+            result=subject
+            expect(result.size).to eq(1)
+          end
+          it "鈴木が含まれない" do
+            result=subject
+            ary=result.map{|user|user.name}
+            expect(ary).not_to include("鈴木")
+          end
+          it "ログインユーザは含まれない" do
+            result=subject
+            ary=result.map{|user|user.name}
+            expect(ary).not_to include(current_user.name)
+          end
+        end
+        describe "「田村」と検索" do
+          subject{User.search("田村",current_user.id)}
+          it "2名のユーザがヒットする" do
+            result=subject
+            expect(result.size).to eq(2)
+          end
+          it "ログインユーザは含まれない" do
+            result=subject
+            ary=result.map{|user|user.name}
+            expect(ary).not_to include(current_user.name)
+          end
+        end
+        describe "「ryo」と検索" do
+          subject{User.search("ryo",current_user.id)}
+          it "1名のユーザがヒットする" do
+            result=subject
+            expect(result.size).to eq(1)
+          end
+          it "ログインユーザは含まれない" do
+            result=subject
+            ary=result.map{|user|user.name}
+            expect(ary).not_to include(current_user.name)
+          end
+        end
+      end
+      context "検索がヒットしない場合" do
+        subject{User.search("test",current_user.id)}
+        describe "「test」と検索" do
+          it "空の配列が返り値として返ってくる" do
+            result=subject
+            expect(result).to be_empty
+          end
+        end
+        context "ログインユーザを検索する場合" do
+          subject{User.search(current_user.name,current_user.id)}
+          it "空の配列が返り値として返ってくる" do
+            result=subject
+            expect(result).to be_empty
+          end
+        end
+      end
+    end
 end
-
-
-
-# it "それ自体と等しい" do
-#   expect(@user).to be(@user)
-# end
-
-#   it "is a new widget" do
-#     @user
-#    user= User.new
-#    expect(user).to be_a_new(User)
-#  end
-
-#  it "is a new String" do
-#    na=Na.new("na",1)
-#    p na
-#    # expect(na).to be_a_new(Na)
-#  end
-
-# it "そもそもユーザが存在しない" do
-#   expect(User.count).to(eq 0)
-# end

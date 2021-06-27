@@ -101,7 +101,7 @@ class User < ActiveRecord::Base
   end
 
   def self.search(keyword,id)
-    self.where("name LIKE ? AND id!=?","%#{params[:search]}%",params[:id])
+    self.where("name LIKE ? AND id!=?","%#{keyword}%",id)
   end
 
   def self.get_achievement_rate(dividend,divisor)
