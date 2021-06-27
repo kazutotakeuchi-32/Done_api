@@ -162,7 +162,6 @@ RSpec.describe   type: :model do
           end
         end
       end
-
       context "6ヶ月単位で集計する場合(type=6months)" do
         context "2020/1/1~6/30" do
           it "6ヶ月分(月)のデータが存在する" do

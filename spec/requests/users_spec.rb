@@ -268,49 +268,268 @@ RSpec.describe "Users", type: :request do
             describe "GET /api/v1/users/:id/bar_graph #bar_graph" do
               context "1年で集計する場合" do
                 describe "2020/1/1~2020/12/31" do
-                  it "" do
+                  it "ステータスコード200が返ってくる" do
                     get(bar_graph_api_v1_user_path(user.id),params:{type:"year",year:"2020",month:"1",day:"1"})
-                    ""
+                    expect(response.status).to eq 200
+                  end
+                  describe "学習計画" do
+                    it "12個のデータが存在する" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"year",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['draftLearns']['search_tasks']['data']
+                      expect(data.size).to eq 12
+                    end
+                    it "グラフタイトル「2020年1月1日~12月31日の学習状況」" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"year",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      title=res['data']['draftLearns']['search_tasks']['title']
+                      expect(title).to eq("2020年1月1日~12月31日の学習状況")
+                    end
+                    it "総学習計画時間は365時間" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"year",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['draftLearns']['search_tasks']['data']
+                      total_time=data.sum{ |d| d['data'].to_i}
+                      expect(total_time).to eq(365)
+                    end
+                  end
+                  describe "学習の振り返り" do
+                    it "12個のデータが存在する" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"year",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['learns']['search_tasks']['data']
+                      expect(data.size).to eq 12
+                    end
+                    it "総学習時間は365時間" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"year",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['learns']['search_tasks']['data']
+                      total_time=data.sum{ |d| d['data'].to_i}
+                      expect(total_time).to eq(365)
+                    end
                   end
                 end
               end
               context "6ヶ月で集計する場合" do
                 describe "2020/1/1~2020/6/30" do
-                  it "" do
-                    get(bar_graph_api_v1_user_path(user.id),params:{type:"year",year:"2020",month:"4",day:"1"})
-                    ""
+                  it "ステータスコード200が返ってくる" do
+                    get(bar_graph_api_v1_user_path(user.id),params:{type:"6months",year:"2020",month:"1",day:"1"})
+                    expect(response.status).to eq 200
+                  end
+                  describe "学習計画" do
+                    it "6個のデータが存在する" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"6months",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['draftLearns']['search_tasks']['data']
+                      expect(data.size).to eq 6
+                    end
+                    it "グラフタイトル「2020年1月1日~6月30日の学習状況」" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"6months",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      title=res['data']['draftLearns']['search_tasks']['title']
+                      expect(title).to eq("2020年1月1日~6月30日の学習状況")
+                    end
+                    it "総学習計画時間は182時間" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"6months",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['draftLearns']['search_tasks']['data']
+                      total_time=data.sum{|d| d['data'].to_i}
+                      expect(total_time).to eq(182)
+                    end
+                  end
+                  describe "学習の振り返り" do
+                    it "6個のデータが存在する" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"6months",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['learns']['search_tasks']['data']
+                      expect(data.size).to eq 6
+                    end
+                    it "総学習時間は182時間" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"6months",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['learns']['search_tasks']['data']
+                      total_time=data.sum{ |d| d['data'].to_i}
+                      expect(total_time).to eq(182)
+                    end
                   end
                 end
               end
               context "3ヶ月で集計する場合" do
                 describe "2020/1/1~2020/3/31" do
-                  it "" do
-                    get(bar_graph_api_v1_user_path(user.id),params:{type:"year",year:"2020",month:"4",day:"1"})
-                    ""
+                  it "ステータスコード200が返ってくる" do
+                    get(bar_graph_api_v1_user_path(user.id),params:{type:"3months",year:"2020",month:"1",day:"1"})
+                    expect(response.status).to eq 200
+                  end
+                  describe "学習計画" do
+                    it "3個のデータが存在する" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"3months",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['draftLearns']['search_tasks']['data']
+                      expect(data.size).to eq 3
+                    end
+                    it "グラフタイトル「2020年1月1日~3月31日の学習状況」" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"3months",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      title=res['data']['draftLearns']['search_tasks']['title']
+                      expect(title).to eq("2020年1月1日~3月31日の学習状況")
+                    end
+                    it "総学習計画時間は91時間" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"3months",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['draftLearns']['search_tasks']['data']
+                      total_time=data.sum { |d| d['data'].to_i}
+                      expect(total_time).to eq(91)
+                    end
+
+                  end
+                  describe "学習の振り返り" do
+                    it "3個のデータが存在する" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"3months",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['learns']['search_tasks']['data']
+                      expect(data.size).to eq 3
+                    end
+                    it "総学習時間は91時間" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"3months",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['learns']['search_tasks']['data']
+                      total_time=data.sum { |d| d['data'].to_i}
+                      expect(total_time).to eq(91)
+                    end
                   end
                 end
               end
               context "1ヶ月で集計する場合" do
                 describe "2020/1/1~2020/1/31" do
-                  it "" do
-                    get(bar_graph_api_v1_user_path(user.id),params:{type:"year",year:"2020",month:"4",day:"1"})
-                    ""
+                  it "ステータスコード200が返ってくる" do
+                    get(bar_graph_api_v1_user_path(user.id),params:{type:"month",year:"2020",month:"1",day:"1"})
+                    expect(response.status).to eq 200
+                  end
+                  describe "学習計画" do
+                    it "31個のデータが存在する" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"month",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['draftLearns']['search_tasks']['data']
+                      expect(data.size).to eq 31
+                    end
+                    it "グラフタイトル「2020年1月1日~1月31日の学習状況」" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"month",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      title=res['data']['draftLearns']['search_tasks']['title']
+                      expect(title).to eq("2020年1月1日~1月31日の学習状況")
+                    end
+                    it "総学習計画時間は31時間" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"month",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['draftLearns']['search_tasks']['data']
+                      total_time=data.sum { |d| d['data'].to_i}
+                      expect(total_time).to eq(31)
+                    end
+
+                  end
+                  describe "学習の振り返り" do
+                    it "31個のデータが存在する" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"month",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['learns']['search_tasks']['data']
+                      expect(data.size).to eq 31
+                    end
+                    it "総学習時間は31時間" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"month",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['learns']['search_tasks']['data']
+                      total_time=data.sum { |d| d['data'].to_i}
+                      expect(total_time).to eq(31)
+                    end
                   end
                 end
               end
               context "1週間で集計する場合" do
                 describe "2020/1/1~1/7" do
-                  it "" do
-                    get(bar_graph_api_v1_user_path(user.id),params:{type:"year",year:"2020",month:"4",day:"1"})
-                    ""
+                  it "ステータスコード200が返ってくる" do
+                    get(bar_graph_api_v1_user_path(user.id),params:{type:"week",year:"2020",month:"1",day:"1"})
+                    expect(response.status).to eq 200
+                  end
+                  describe "学習計画" do
+                    it "7個のデータが存在する" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"week",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['draftLearns']['search_tasks']['data']
+                      expect(data.size).to eq 7
+                    end
+                    it "グラフタイトル「2020年1月1日~1月7日の学習状況」" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"week",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      title=res['data']['draftLearns']['search_tasks']['title']
+                      expect(title).to eq("2020年1月1日~1月7日の学習状況")
+                    end
+                    it "総学習計画時間は7時間" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"week",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['draftLearns']['search_tasks']['data']
+                      total_time=data.sum { |d| d['data'].to_i}
+                      expect(total_time).to eq(7)
+                    end
+                  end
+                  describe "学習の振り返り" do
+                    it "7個のデータが存在する" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"week",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['learns']['search_tasks']['data']
+                      expect(data.size).to eq 7
+                    end
+                    it "総学習時間は7時間" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"week",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['learns']['search_tasks']['data']
+                      total_time=data.sum { |d| d['data'].to_i}
+                      expect(total_time).to eq(7)
+                    end
                   end
                 end
               end
               context "1日で集計する場合" do
                 describe "2020/1/1 00:00:00~23:59:59" do
-                  it "" do
-                    get(bar_graph_api_v1_user_path(user.id),params:{type:"year",year:"2020",month:"4",day:"1"})
-                    ""
+                  it "ステータスコード200が返ってくる" do
+                    get(bar_graph_api_v1_user_path(user.id),params:{type:"day",year:"2020",month:"1",day:"1"})
+                    expect(response.status).to eq 200
+                  end
+                  describe "学習計画" do
+                    it "1個のデータが存在する" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"day",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['draftLearns']['search_tasks']['data']
+                      expect(data.size).to eq 1
+                    end
+                    it "グラフタイトル「2020年1月1日の学習状況」" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"day",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      title=res['data']['draftLearns']['search_tasks']['title']
+                      expect(title).to eq("2020年1月1日の学習状況")
+                    end
+                    it "総学習計画時間は1時間" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"day",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['draftLearns']['search_tasks']['data']
+                      total_time=data.sum { |d| d['data'].to_i}
+                      expect(total_time).to eq(1)
+                    end
+
+                  end
+                  describe "学習の振り返り" do
+                    it "1個のデータが存在する" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"day",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['learns']['search_tasks']['data']
+                      expect(data.size).to eq 1
+                    end
+                    it "総学習時間は1時間" do
+                      get(bar_graph_api_v1_user_path(user.id),params:{type:"day",year:"2020",month:"1",day:"1"})
+                      res=JSON.parse(response.body)
+                      data=res['data']['learns']['search_tasks']['data']
+                      total_time=data.sum { |d| d['data'].to_i}
+                      expect(total_time).to eq(1)
+                    end
                   end
                 end
               end
