@@ -38,7 +38,7 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def search
-    return render json:{data:{users:[] }} if params[:search].blank? || params[:search]==nil
+    return render json:{data:{users:[],message:"文字列を入力をしてください。"}},status:401 if params[:keyword].blank? || params[:keyword]==nil
     # users = User.where("name LIKE ? ","%#{params[:search]}%")
     # where("name LIKE ? AND id!=?","%#{params[:search]}%",params[:id])
     users = User.search(params[:keyword],params[:id])
@@ -47,7 +47,7 @@ class Api::V1::UsersController < ApplicationController
        users:users,
        message:users.length==0 ? "検索結果がありません。": ""
       }
-    }
+    },status:200
   end
 
   def pie_graph

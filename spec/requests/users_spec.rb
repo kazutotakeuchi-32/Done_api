@@ -628,5 +628,102 @@ RSpec.describe "Users", type: :request do
         end
       end
     end
+    describe "ユーザ検索" do
+      before do
+        10.times do |n|
+          FactoryBot.create(:"test_user#{n+1}")
+        end
+      end
+      describe "get /api/v1/users/search?search=&id=" do
+        context "検索結果がヒットする場合" do
+          describe "「鈴木」と検索" do
+            subject{get(search_api_v1_users_path,params:{id:user.id,keyword:"鈴木"})}
+            it "ステータスコード200が返ってくる" do
+              subject
+              expect(response.status).to eq 200
+            end
+            it "3名のユーザがヒットする" do
+              subject
+              res=JSON.parse(response.body)
+              expect(res['data']['users'].length).to eq 3
+            end
+            it "鈴木,鈴木龍弥,鈴木純也が含まれる" do
+              subject
+              res=JSON.parse(response.body)
+              ary=res['data']['users'].map{|user|user['name']}
+              expect(ary).to include("鈴木","鈴木龍弥","鈴木純也")
+            end
+            it "ログインユーザは含まれない" do
+              subject
+              res=JSON.parse(response.body)
+              ary=res['data']['users'].map{|user|user['name']}
+              expect(ary).not_to include(user.name)
+            end
+          end
+          describe "「鈴木純也」と検索" do
+            subject{get(search_api_v1_users_path,params:{id:user.id,keyword:"鈴木純也"})}
+            it "ステータスコード200が返ってくる" do
+              subject
+              expect(response.status).to eq 200
+            end
+            it "1名のユーザがヒットする" do
+              subject
+              res=JSON.parse(response.body)
+              expect(res['data']['users'].length).to eq 1
+            end
+            it "ログインユーザは含まれない" do
+              subject
+              res=JSON.parse(response.body)
+              ary=res['data']['users'].map{|user|user['name']}
+              expect(ary).not_to include(user.name)
+            end
+            describe "「ryo」と検索" do
+              subject{get(search_api_v1_users_path,params:{id:user.id,keyword:"ryo"})}
+              it "1名のユーザがヒットする" do
+                subject
+                res=JSON.parse(response.body)
+                expect(res.size).to eq(1)
+              end
+              it "ログインユーザは含まれない" do
+                subject
+                res=JSON.parse(response.body)
+                ary=res['data']['users'].map{|user|user['name']}
+                expect(ary).not_to include(user.name)
+              end
+            end
+          end
+        end
+        context "検索結果がヒットしない場合" do
+          describe "そもそも空白・nil" do
+            it "空白" do
+              get(search_api_v1_users_path,params:{id:user.id,keyword:""})
+              res=JSON.parse(response.body)
+              expect(res['data']['message']).to include("文字列を入力をしてください。")
+              expect(response.status).to eq 401
+            end
+            it "nil" do
+              get(search_api_v1_users_path,params:{id:user.id,keyword:""})
+              res=JSON.parse(response.body)
+              expect(res['data']['message']).to include("文字列を入力をしてください。")
+              expect(response.status).to eq 401
+            end
+          end
+          describe "入力した文字列に一致するユーザが存在しない" do
+            it "「suzuki」と検索" do
+              get(search_api_v1_users_path,params:{id:user.id,keyword:"suzuki"})
+              res=JSON.parse(response.body)
+              expect(res['data']['message']).to include("検索結果がありません。")
+              expect(response.status).to eq  200
+            end
+            it "「竹内智也」と検索" do
+              get(search_api_v1_users_path,params:{id:user.id,keyword:"竹内智也"})
+              res=JSON.parse(response.body)
+              expect(res['data']['message']).to include("検索結果がありません。")
+              expect(response.status).to eq  200
+            end
+          end
+        end
+      end
+    end
   end
 end
