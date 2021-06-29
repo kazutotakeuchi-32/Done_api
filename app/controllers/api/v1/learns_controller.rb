@@ -44,7 +44,7 @@ class Api::V1::LearnsController < ApplicationController
      },status:200
   end
 
-  def  past_tasks
+  def past_tasks
     user = User.find(params[:id])
     rows = params[:rows].to_i
     learns = user.learns
