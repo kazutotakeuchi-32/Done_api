@@ -4,21 +4,21 @@ RSpec.describe "Learns", type: :request do
   let(:user){FactoryBot.create(:other)}
   let(:draft_learn){FactoryBot.create(:draft_learn,user_id:user.id)}
   let(:learn){FactoryBot.build(:learn,user_id:user.id,draft_learn_id:draft_learn.id)}
+  before do
+    @params=auth_post user, api_v1_user_session_path,
+    params:{
+      email:user.email,
+      password:"000000"
+    }
+    @learn_params={
+      title:learn.title,
+      content:learn.content,
+      time:learn.time,
+      subject:learn.subject,
+      user_id:learn.user_id,
+    }
+  end
   describe "学習完了投稿機能" do
-    before do
-      @params=auth_post user, api_v1_user_session_path,
-      params:{
-        email:user.email,
-        password:"000000"
-      }
-      @learn_params={
-        title:learn.title,
-        content:learn.content,
-        time:learn.time,
-        subject:learn.subject,
-        user_id:learn.user_id,
-      }
-    end
     describe "Post /api/v1/learns #create" do
         context "投稿に成功する" do
           describe "ログインをしている" do
@@ -103,5 +103,42 @@ RSpec.describe "Learns", type: :request do
     end
   end
   describe "今日のタスク" do
+    describe "GET /api/v1/learns/todays_task #todays_task" do
+      let(:other_user){FactoryBot.create(:test_user1)}
+      before do
+        FactoryBot.create(:learn,draft_learn_id:draft_learn.id,user_id:user.id,created_at:Time.now)
+        FactoryBot.create(:learn,draft_learn_id:draft_learn.id,user_id:other_user.id)
+      end
+        describe "タスクを取得できる" do
+          it "当日のタスクが存在する" do
+            get(todays_task_api_v1_learns_path,params:{id:user.id},headers:@params[:headers])
+            res = JSON.parse(response.body)
+            expect(res['data']['nextTasks']['data'].size).to eq 1
+          end
+          it "ステータスコード200が返ってくる" do
+            get(todays_task_api_v1_learns_path,params:{id:user.id},headers:@params[:headers])
+            expect(response.status).to eq 200
+          end
+        end
+        describe "他のユーザのタスクも取得ができる" do
+          it "当日のタスクが存在する" do
+            get(todays_task_api_v1_learns_path,params:{id:other_user.id},headers:@params[:headers])
+            res = JSON.parse(response.body)
+            expect(res['data']['nextTasks']['data'].size).to eq 1
+          end
+          it "ステータスコード200が返ってくる" do
+            get(todays_task_api_v1_learns_path,params:{id:user.id},headers:@params[:headers])
+            expect(response.status).to eq 200
+          end
+        end
+        describe "タスクを取得できない" do
+          it "そもそもタスクが存在しない" do
+            travel 2.day
+            get(todays_task_api_v1_learns_path,params:{id:other_user.id},headers:@params[:headers])
+            res = JSON.parse(response.body)
+            expect(res['data']['nextTasks']['data']).to  be_empty
+          end
+        end
+    end
   end
 end
