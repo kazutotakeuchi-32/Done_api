@@ -30,7 +30,12 @@ class Api::V1::LearnsController < ApplicationController
   end
 
   def todays_task
-    user = User.find(params[:id])
+    user = User.find_by(params[:id])
+    return render json: {
+      data:{
+       errors:"ユーザが存在しません。"
+      }
+     },status:401 if !user
     learns=user.learns
     # # learns    =  current_api_v1_user.learns
     next_tasks =  learns.date_range(Time.now.beginning_of_day,Time.now.end_of_day)
@@ -44,8 +49,13 @@ class Api::V1::LearnsController < ApplicationController
      },status:200
   end
 
-  def past_tasks
-    user = User.find(params[:id])
+  def  past_tasks
+    user = User.find_by(id:params[:id])
+    return render json: {
+      data:{
+       errors:"ユーザが存在しません。"
+      }
+     },status:401 if !user
     rows = params[:rows].to_i
     learns = user.learns
     cuurent_page=params[:cuurent_page].to_i
@@ -53,13 +63,15 @@ class Api::V1::LearnsController < ApplicationController
     start_range=cuurent_page-1 <=0  ? 0 : (cuurent_page-1)*rows
     previous_tasks= learns.where("created_at < ?",Time.now.ago(1.days).end_of_day)
     max_page = get_max_page(previous_tasks,rows)
-    data= data=previous_tasks.order(created_at:"DESC")[start_range..(end_range-1)]
+    data=previous_tasks.order(created_at:"DESC")[start_range..(end_range-1)]
+    message=data.nil? ?  "ページが存在しないです。": ""
     render json: {
       data:{
         previousTasks:{
           data:data,
           title: "#{Time.now.year}年#{Time.now.month}月#{Time.now.day}日の学習予定（本日）"
         },
+        message: message ,
         maxPage:max_page,
       }
      },status:200

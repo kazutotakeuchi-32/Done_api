@@ -1,9 +1,9 @@
 require 'rails_helper'
-
 RSpec.describe "Learns", type: :request do
   let(:user){FactoryBot.create(:other)}
   let(:draft_learn){FactoryBot.create(:draft_learn,user_id:user.id)}
   let(:learn){FactoryBot.build(:learn,user_id:user.id,draft_learn_id:draft_learn.id)}
+  let(:other_user){FactoryBot.create(:test_user1)}
   before do
     @params=auth_post user, api_v1_user_session_path,
     params:{
@@ -104,7 +104,6 @@ RSpec.describe "Learns", type: :request do
   end
   describe "今日のタスク" do
     describe "GET /api/v1/learns/todays_task #todays_task" do
-      let(:other_user){FactoryBot.create(:test_user1)}
       before do
         FactoryBot.create(:learn,draft_learn_id:draft_learn.id,user_id:user.id,created_at:Time.now)
         FactoryBot.create(:learn,draft_learn_id:draft_learn.id,user_id:other_user.id)
@@ -139,6 +138,183 @@ RSpec.describe "Learns", type: :request do
             expect(res['data']['nextTasks']['data']).to  be_empty
           end
         end
+    end
+  end
+  describe "過去のタスク" do
+    describe "GET /api/v1/learns/past_tasks?id=&cuurent_page=&rows=" do
+      before "" do
+        100.times do |n|
+          FactoryBot.create(:learn,draft_learn_id:draft_learn.id,user_id:user.id,created_at:Time.now)
+          FactoryBot.create(:learn,draft_learn_id:draft_learn.id,user_id:other_user.id)
+        end
+      end
+      describe "データが降順に整列されている" do
+        it "１ページ目の最初のタスクが最後にDBに登録されていれば、降順に整列されている" do
+          travel 1.day
+          get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:1,rows:10},headers:@params[:headers])
+          res=JSON.parse(response.body)
+          last_learn=Learn.where(user_id:user.id)[-1]
+          expect(res['data']['previousTasks']['data'][0]['id']).to eq  last_learn.id
+        end
+      end
+      context "最大タスク表示数10の場合" do
+        describe "1ページ目" do
+          subject{ get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:1,rows:10},headers:@params[:headers])}
+          it "10個のタスクを取得する" do
+            travel 1.day
+            subject
+            res=JSON.parse(response.body)
+            expect(res['data']['previousTasks']['data'].size).to eq 10
+          end
+          it "ステータスコードが200が返ってくる" do
+            travel 1.day
+            subject
+            expect(response.status).to eq 200
+          end
+        end
+        describe "5ページ目" do
+          it "10個のタスクを取得する" do
+            travel 1.day
+            get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:5,rows:10},headers:@params[:headers])
+            res=JSON.parse(response.body)
+            expect(res['data']['previousTasks']['data'].size).to eq 10
+          end
+          it "ステータスコードが200が返ってくる" do
+            travel 1.day
+            get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:5,rows:10},headers:@params[:headers])
+            expect(response.status).to eq 200
+          end
+        end
+        describe "10ページ目" do
+          it "10個のタスクを取得する" do
+            travel 1.day
+            get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:10,rows:10},headers:@params[:headers])
+            res=JSON.parse(response.body)
+            expect(res['data']['previousTasks']['data'].size).to eq 10
+          end
+          it "ステータスコードが200が返ってくる" do
+            travel 1.day
+            get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:10,rows:10},headers:@params[:headers])
+            expect(response.status).to eq 200
+          end
+        end
+      end
+      context "最大タスク表示数20の場合" do
+        subject{ get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:1,rows:20},headers:@params[:headers])}
+        describe "1ページ目" do
+          it "20個のタスクを取得する" do
+            travel 1.day
+            subject
+            res=JSON.parse(response.body)
+            expect(res['data']['previousTasks']['data'].size).to eq 20
+          end
+          it "ステータスコードが200が返ってくる" do
+            travel 1.day
+            subject
+            expect(response.status).to eq 200
+          end
+        end
+        describe "2ページ目" do
+          it "20個のタスクを取得する" do
+            travel 1.day
+            get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:2,rows:20},headers:@params[:headers])
+            res=JSON.parse(response.body)
+            expect(res['data']['previousTasks']['data'].size).to eq 20
+          end
+          it "ステータスコードが200が返ってくる" do
+            travel 1.day
+            get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:2,rows:20},headers:@params[:headers])
+            expect(response.status).to eq 200
+          end
+        end
+        describe "5ページ目" do
+          it "20個のタスクを取得する" do
+            travel 1.day
+            get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:2,rows:20},headers:@params[:headers])
+            res=JSON.parse(response.body)
+            expect(res['data']['previousTasks']['data'].size).to eq 20
+          end
+          it "ステータスコードが200が返ってくる" do
+            travel 1.day
+            get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:2,rows:20},headers:@params[:headers])
+            expect(response.status).to eq 200
+          end
+        end
+      end
+      context "最大タスク表示数30の場合" do
+        subject{ get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:1,rows:30},headers:@params[:headers])}
+        describe "1ページ目" do
+          it "30個のタスクを取得する" do
+            travel 1.day
+            subject
+            res=JSON.parse(response.body)
+            expect(res['data']['previousTasks']['data'].size).to eq 30
+          end
+          it "ステータスコードが200が返ってくる" do
+            travel 1.day
+            subject
+            expect(response.status).to eq 200
+          end
+        end
+        describe "3ページ目" do
+          it "30個のタスクを取得する" do
+            travel 1.day
+            get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:3,rows:30},headers:@params[:headers])
+            res=JSON.parse(response.body)
+            expect(res['data']['previousTasks']['data'].size).to eq 30
+          end
+          it "ステータスコードが200が返ってくる" do
+            travel 1.day
+            get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:3,rows:30},headers:@params[:headers])
+            expect(response.status).to eq 200
+          end
+        end
+        describe "4ページ目" do
+          it "10個のタスクを取得する" do
+            travel 1.day
+            get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:4,rows:30},headers:@params[:headers])
+            res=JSON.parse(response.body)
+            expect(res['data']['previousTasks']['data'].size).to eq 10
+          end
+          it "ステータスコードが200が返ってくる" do
+            travel 1.day
+            get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:4,rows:30},headers:@params[:headers])
+            expect(response.status).to eq 200
+          end
+        end
+      end
+      describe "存在しないページが指定された" do
+        it "タスクが存在しない(nil)" do
+          travel 1.day
+          get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:5,rows:30},headers:@params[:headers])
+          res=JSON.parse(response.body)
+          expect(res['data']['previousTasks']['data']).to be_nil
+        end
+      end
+      describe "存在しないユーザが指定された" do
+        it "ステータスコード401が返ってくる"do
+        travel 1.day
+          get(past_tasks_api_v1_learns_path,params:{id:100,cuurent_page:5,rows:30},headers:@params[:headers])
+          expect(response.status).to eq 401
+        end
+        it "エラーメッセージが返ってくる" do
+          get(past_tasks_api_v1_learns_path,params:{id:100,cuurent_page:5,rows:30},headers:@params[:headers])
+          res=JSON.parse(response.body)
+          expect(res['data']['errors']).to include("ユーザが存在しません。")
+        end
+      end
+      describe "当日のタスクは取得しない" do
+        it "データが存在しない" do
+          get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:5,rows:30},headers:@params[:headers])
+          res=JSON.parse(response.body)
+          expect(res['data']['previousTasks']['data']).to be_nil
+        end
+        it "ステータスコード200が返ってくる" do
+          get(past_tasks_api_v1_learns_path,params:{id:user.id,cuurent_page:5,rows:30},headers:@params[:headers])
+          res=JSON.parse(response.body)
+          expect(res['data']['previousTasks']['data']).to be_nil
+        end
+      end
     end
   end
 end

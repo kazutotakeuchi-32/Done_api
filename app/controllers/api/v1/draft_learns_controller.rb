@@ -31,7 +31,13 @@ class Api::V1::DraftLearnsController < ApplicationController
   end
 
   def todays_task
-    user = User.find(params[:id])
+    user = User.find_by(id:params[:id])
+   return render json: {
+      data:{
+       errors:"ユーザが存在しません。"
+      }
+     },status:401 if !user
+
     draft_learns = user.draft_learns
     # draft_learns = current_api_v1_user.draft_learns
     next_tasks=draft_learns.date_range(Time.now.beginning_of_day,Time.now.end_of_day)
@@ -48,7 +54,12 @@ class Api::V1::DraftLearnsController < ApplicationController
   end
 
   def  past_tasks
-    user = User.find(params[:id])
+    user = User.find_by(id:params[:id])
+    return render json: {
+      data:{
+       errors:"ユーザが存在しません。"
+      }
+     },status:401 if !user
     draft_learns = user.draft_learns
     previous_tasks= draft_learns.where("created_at < ?",Time.now.ago(1.days).end_of_day)
     render json: {
