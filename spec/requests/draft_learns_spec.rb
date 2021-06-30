@@ -133,4 +133,6 @@ RSpec.describe "DraftLearns", type: :request do
         end
     end
   end
+  describe "過去のタスク" do
+  end
 end
