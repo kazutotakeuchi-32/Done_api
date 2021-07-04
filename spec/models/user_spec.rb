@@ -215,4 +215,7 @@ RSpec.describe User, type: :model do
         end
       end
     end
+    describe "フォロー機能" do
+
+    end
 end
