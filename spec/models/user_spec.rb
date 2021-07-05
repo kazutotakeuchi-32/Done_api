@@ -114,7 +114,14 @@ RSpec.describe User, type: :model do
     end
   end
 
+  let(:current_user){User.find_by(name:"竹内和人")}
+
   describe "ユーザ検索機能" do
+    before do
+      10.times do |n|
+        FactoryBot.create(:"test_user#{n+1}")
+      end
+    end
     """
     テストユーザ名
     田村悠人
@@ -127,12 +134,6 @@ RSpec.describe User, type: :model do
     ryo
     yui
     """
-    before do
-      10.times do |n|
-        FactoryBot.create(:"test_user#{n+1}")
-      end
-    end
-    let(:current_user){User.find_by(name:"竹内和人")}
     context "検索がヒットする場合" do
         describe "「鈴木」と検索" do
           subject{User.search("鈴木",current_user.id)}
@@ -211,6 +212,108 @@ RSpec.describe User, type: :model do
           it "空の配列が返り値として返ってくる" do
             result=subject
             expect(result).to be_empty
+          end
+        end
+      end
+    end
+    describe "フォロー機能" do
+      before do
+        10.times do |n|
+          FactoryBot.create(:"test_user#{n+1}")
+        end
+      end
+      let(:other_user){User.find_by(name:"田村悠人")}
+     describe "follow フォロー" do
+        context "フォローをしていないユーザをフォロー" do
+          it "フォローできる" do
+            current_user.follow(other_user) if   !current_user.following?(other_user)
+            expect(current_user.followings.ids).to include other_user.id
+          end
+          it "フォローしたユーザの'フォロー'が増える" do
+            expect{current_user.follow(other_user)}.to change{current_user.followings.ids.count}.from(0).to(1) if   !current_user.following?(other_user)
+          end
+          it "フォローされたユーザの'フォロワー 'が増える" do
+            expect{current_user.follow(other_user)}.to change{other_user.followers.ids.count}.from(0).to(1) if   !current_user.following?(other_user)
+          end
+        end
+        context "フォロー済みのユーザをフォロー" do
+          before do
+            current_user.follow(other_user)
+          end
+          it "フォローしたユーザの'フォロー'が変わらない"do
+            before_followings_size=current_user.followings.ids.size
+            current_user.follow(other_user)
+            expect(current_user.followings.ids.size).to eq (before_followings_size)
+          end
+          it "フォローされたユーザの'フォロワー 'が変わらない" do
+            before_followers_size=other_user.followers.ids.size
+            current_user.follow(other_user)
+            expect(other_user.followers.ids.size).to eq (before_followers_size)
+          end
+        end
+      end
+      describe "unfollow アンフォロー" do
+        context "フォロー済み" do
+          before do
+            current_user.follow(other_user)
+          end
+          it "アンフォローできる" do
+            current_user.unfollow(other_user) if   current_user.following?(other_user)
+            expect(current_user.followings.ids).not_to include other_user.id
+          end
+          it "フォローしたユーザの'フォロー'が減る" do
+            expect{current_user.unfollow(other_user)}.to change{current_user.followings.ids.count}.from(1).to(0) if   current_user.following?(other_user)
+          end
+          it "フォローされたユーザの'フォロワー 'が減る" do
+            expect{current_user.unfollow(other_user)}.to change{other_user.followers.ids.count}.from(1).to(0) if   current_user.following?(other_user)
+          end
+
+        end
+        context "フォロー未だ" do
+          it "フォローしたユーザの'フォロー'が変わらない"do
+          before_followings_size=current_user.followings.ids.size
+          current_user.unfollow(other_user)
+          expect(current_user.followings.ids.size).to eq (before_followings_size)
+          end
+          it "フォローされたユーザの'フォロワー 'が変わらない" do
+            before_followers_size=other_user.followers.ids.size
+            current_user.unfollow(other_user)
+            expect(other_user.followers.ids.size).to eq (before_followers_size)
+          end
+        end
+      end
+      describe "following? フォロー済み" do
+        context "trueを返す" do
+          before do
+            current_user.follow(other_user)
+          end
+          it "引数に渡されたユーザがフォローされている" do
+            expect(current_user.following?(other_user)).to  be_truthy
+          end
+        end
+        context "falseを返す" do
+          it "ユーザがフォローされていない場合" do
+            expect(current_user.following?(other_user)).to  be_falsey
+          end
+        end
+      end
+      describe "mutual_following? 相互フォロー" do
+        context "trueを返す" do
+          before do
+            current_user.follow(other_user)
+            other_user.follow(current_user)
+          end
+          it "お互いフォローをしている" do
+            expect(current_user.mutual_following?(other_user)).to be_truthy
+          end
+        end
+        context "falseを返す" do
+          it "どちらもフォローしていない" do
+            expect(current_user.mutual_following?(other_user)).to be_falsey
+          end
+          it "片方のユーザのみフォローしている" do
+            current_user.follow(other_user)
+            expect(current_user.mutual_following?(other_user)).to be_falsey
           end
         end
       end
