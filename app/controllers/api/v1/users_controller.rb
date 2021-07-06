@@ -129,8 +129,6 @@ class Api::V1::UsersController < ApplicationController
     }
   end
 
-
-
   def time_line
     cuurent_page=params[:cuurent_page].to_i
     users,time_line = aggregation_type(params[:type])
