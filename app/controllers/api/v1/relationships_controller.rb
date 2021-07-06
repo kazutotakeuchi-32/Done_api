@@ -3,7 +3,13 @@ class Api::V1::RelationshipsController < ApplicationController
   before_action :set_other_user,only: :create
 
   def create
-    return if current_api_v1_user.following?(@other_user)
+    return  render json: {
+      data:{
+        message:"既にフォローしています。",
+        followings:current_api_v1_user.following_ids,
+        followers: current_api_v1_user.follower_ids,
+      }
+     },status:200 if current_api_v1_user.following?(@other_user)
     follow=current_api_v1_user.follow(@other_user)
     Notification.create(
       sender_id:current_api_v1_user.id,
@@ -45,7 +51,7 @@ class Api::V1::RelationshipsController < ApplicationController
     else
       render json: {
         data:{
-          message:"フォローされていません",
+          message:"フォローしていません",
           followings:current_api_v1_user.following_ids,
           followers: current_api_v1_user.follower_ids,
         }
