@@ -725,5 +725,9 @@ RSpec.describe "Users", type: :request do
         end
       end
     end
+    describe "タイムライン" do
+      before do
+      end
+    end
   end
 end
