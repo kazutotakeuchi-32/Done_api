@@ -136,12 +136,23 @@ class Api::V1::UsersController < ApplicationController
     max_page = get_max_page(output)
     end_range   = (cuurent_page*30-1)
     start_range = cuurent_page-1 <=0  ? 0 : (cuurent_page-1)*30
-    render json:{
-      data:{
-        timeLine:output[start_range..end_range],
-        maxPage:max_page
-      }
-    }
+    time_line=output[start_range..end_range]
+    if time_line
+      render json:{
+        data:{
+          timeLine:time_line,
+          maxPage:max_page
+        }
+      },status:200
+    else
+      render json:{
+        data:{
+          timeLine:time_line,
+          maxPage:max_page,
+          message:"ページが存在しません。"
+        }
+      },status:401
+    end
   end
 
   private
@@ -227,7 +238,7 @@ class Api::V1::UsersController < ApplicationController
         time_line = get_time_line(following_ids)
         users=@user.combine_with_friends
       when "MYONLY"
-        # ユーザの投稿のみ
+        # ログインユーザの投稿のみ
         time_line = get_time_line([@user.id])
         users=[@user]
       when "LIKE"
