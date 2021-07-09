@@ -10,7 +10,6 @@ class Like < ApplicationRecord
       like.save
     end
   end
-
   def self.likeing_destroys(likeing_contents,model)
     likeing_contents.each do |content|
       like=Like.find_by(model[:id]=>content.id)

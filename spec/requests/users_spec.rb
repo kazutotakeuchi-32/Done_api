@@ -792,8 +792,23 @@ RSpec.describe "Users", type: :request do
                     end
                   end
                   # いいね機能単体テスト・APIテスト後にかく
-                  # context "type=LIKEと指定した場合" do
-                  # end
+                  context "type=LIKEと指定した場合" do
+                    before do
+                      @date=@other_user.draft_learns[0].created_at
+                      post(api_v1_likes_path,params:{type:"DRAFTLEARN",date:@date,other_user:@other_user.id},headers:@params[:headers])
+                    end
+                    it "データが1個、存在する" do
+                      get(time_line_api_v1_user_path(user.id),params:{cuurent_page:1,type:"LIKE"})
+                      res=JSON.parse(response.body)
+                      expect(res['data']['timeLine'].length).to eq 1
+                    end
+                    it "いいね解除したら、データは空" do
+                      delete(api_v1_likes_path,params:{type:"DRAFTLEARN",date:@date,other_user:@other_user.id},headers:@params[:headers])
+                      get(time_line_api_v1_user_path(user.id),params:{cuurent_page:1,type:"LIKE"})
+                      res=JSON.parse(response.body)
+                      expect(res['data']['timeLine'].length).to eq 0
+                    end
+                  end
                 end
                 context "testuserをフォローしていない場合場合" do
                   it "testuserの投稿が存在しない" do

@@ -6,6 +6,12 @@ class Api::V1::LikesController < ApplicationController
 
   def create
     likeing_contents,model=@other_user.likeing_type(@type,@date)
+    return render json:{
+      data:{
+        message:"投稿が存在しません"
+      }
+    },status:401 if likeing_contents==[]
+
     Like.likeing_saves(likeing_contents,model,current_api_v1_user)
     item_id=likeing_contents[0][:draft_learn_id]? :learn_id : :draft_learn_id
     Notification.create(
@@ -24,6 +30,11 @@ class Api::V1::LikesController < ApplicationController
 
   def destroy
     likeing_contents,model=current_api_v1_user.unlike_type(@type,@other_user,@date)
+    return render json:{
+      data:{
+        message:"投稿が存在しません"
+      }
+    },status:401 if likeing_contents==[]
     Like.likeing_destroys(likeing_contents,model)
     item_id=likeing_contents[0][:draft_learn_id]? :learn_id : :draft_learn_id
      # いいねを解除されたら通知を削除。
