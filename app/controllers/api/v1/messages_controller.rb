@@ -17,7 +17,7 @@ class Api::V1::MessagesController < ApplicationController
       ActionCable.server.broadcast("room_channel",{room:entry,message:message,read:read})
       render json:{data:{message:message,read:read}},status:200
     else
-      render json:{data:{message:"投稿に失敗しました。"}},status:401
+      render json:{data:{message:"投稿に失敗しました。",errors:message.errors.full_messages}},status:401
     end
   end
 
