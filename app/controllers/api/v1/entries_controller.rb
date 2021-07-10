@@ -8,7 +8,7 @@ class Api::V1::EntriesController < ApplicationController
       }
     },status:401  if !user.mutual_following?(other_user)
 
-    if Entry.entry_exist?(user,other_user)
+    if Entry.entry_not_exist?(user,other_user)
       room=Room.create()
       [
         {user_id:user.id,room_id:room.id},
