@@ -154,6 +154,54 @@ RSpec.describe "Rooms", type: :request do
             end
           end
         end
+        context "未読→既読の確認" do
+          context "ログインユーザが入室した場合" do
+            it "相手の投稿したメッセージステータスが「既読」になる" do
+              subject
+              rooms=JSON.parse(response.body)['data']['rooms']
+              rooms.each_with_index do |room,i|
+                get(api_v1_user_room_path(cuurent_user.id,room['room']['room_id']))
+                res=JSON.parse(response.body)
+                 message=res['data']['messages'].select{|message|message['user_id']!=cuurent_user.id}[0]
+                 expect(Message.find( message['id']).read.already_read).to be_truthy
+              end
+            end
+            it "自分が投稿したメッセージは未読のままである" do
+              subject
+              rooms=JSON.parse(response.body)['data']['rooms']
+              rooms.each_with_index do |room,i|
+                get(api_v1_user_room_path(cuurent_user.id,room['room']['room_id']))
+                res=JSON.parse(response.body)
+                 message=res['data']['messages'].select{|message|message['user_id']==cuurent_user.id}[0]
+                 expect(Message.find( message['id']).read.already_read).to be_falsey
+              end
+            end
+          end
+          context "他のユーザが入室した場合" do
+            it "ログインユーザが投稿したメッセージが既読になる" do
+              subject
+              users=[other_user3,other_user2,other_user1]
+              rooms=JSON.parse(response.body)['data']['rooms']
+              rooms.each_with_index do |room,i|
+                get(api_v1_user_room_path(users[i].id,room['room']['room_id']))
+                res=JSON.parse(response.body)
+                message=res['data']['messages'].select{|message|message['user_id']==cuurent_user.id}[0]
+                expect(Message.find( message['id']).read.already_read).to be_truthy
+              end
+            end
+            it "ログインユーザ以外のユーザが投稿したメッセージが未読になるになる" do
+              subject
+              users=[other_user3,other_user2,other_user1]
+              rooms=JSON.parse(response.body)['data']['rooms']
+              rooms.each_with_index do |room,i|
+                get(api_v1_user_room_path(users[i].id,room['room']['room_id']))
+                res=JSON.parse(response.body)
+                message=res['data']['messages'].select{|message|message['user_id']!=cuurent_user.id}[0]
+                expect(Message.find( message['id']).read.already_read).to be_falsey
+              end
+            end
+          end
+        end
       end
     end
   end
