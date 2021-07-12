@@ -59,6 +59,8 @@ RSpec.describe "Relationships", type: :request do
           end
         end
       end
+      context "通知" do
+      end
     end
     describe "アンフォロー"do
       describe "delete /api/v1/relationships" do
@@ -111,6 +113,8 @@ RSpec.describe "Relationships", type: :request do
             expect(e.class).to eq ActiveRecord::RecordNotFound
           end
         end
+      end
+      context "通知削除" do
       end
     end
   end

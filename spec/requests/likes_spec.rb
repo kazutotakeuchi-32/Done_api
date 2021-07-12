@@ -95,6 +95,8 @@ RSpec.describe "Likes", type: :request do
           end
         end
       end
+      context "通知" do
+      end
     end
     describe "いいねを解除する" do
       describe "DELETE api/v1/likes#destroy" do
@@ -143,6 +145,8 @@ RSpec.describe "Likes", type: :request do
             res = JSON.parse(response.body)
             expect(res['data']['message']).to eq "投稿が存在しません"
           end
+        end
+        context "通知を削除する" do
         end
       end
     end
