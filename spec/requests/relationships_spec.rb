@@ -60,6 +60,13 @@ RSpec.describe "Relationships", type: :request do
         end
       end
       context "通知" do
+        it "kindは「フォロー」である" do
+          post(api_v1_relationships_path,params:{follow_id:other_user.id},headers:@params[:headers])
+          expect(Notification.all[0].kind).to eq "フォロー"
+        end
+        it "通知が増える" do
+          expect{post(api_v1_relationships_path,params:{follow_id:other_user.id},headers:@params[:headers])}.to change(Notification,:count).from(0).to(1)
+        end
       end
     end
     describe "アンフォロー"do
@@ -115,6 +122,13 @@ RSpec.describe "Relationships", type: :request do
         end
       end
       context "通知削除" do
+        before do
+          post(api_v1_relationships_path,params:{follow_id:other_user.id},headers:@params[:headers])
+        end
+        it "通知が減る" do
+          delete(api_v1_relationship_path(other_user.id),headers:@params[:headers])
+          expect(Notification.all.size).to eq 0
+        end
       end
     end
   end

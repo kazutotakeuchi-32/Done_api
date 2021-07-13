@@ -96,6 +96,18 @@ RSpec.describe "Likes", type: :request do
         end
       end
       context "通知" do
+        before do
+          @date=cuurent_user.draft_learns[0].created_at
+        end
+        it "通知が増える" do
+          before_like_count=Like.all.count
+          expect{post(api_v1_likes_path,params:{type:"DRAFTLEARN",date:@date,other_user:cuurent_user.id},headers:@params[:headers],)}.to change(Notification,:count).from(0).to(1)
+        end
+        it "通知のkindが「いいね」" do
+          before_like_count=Like.all.count
+          post(api_v1_likes_path,params:{type:"DRAFTLEARN",date:@date,other_user:cuurent_user.id},headers:@params[:headers],)
+          expect(Notification.all[0].kind).to eq "いいね"
+        end
       end
     end
     describe "いいねを解除する" do
@@ -147,6 +159,13 @@ RSpec.describe "Likes", type: :request do
           end
         end
         context "通知を削除する" do
+          before do
+            @date=cuurent_user.draft_learns[0].created_at
+            post(api_v1_likes_path,params:{type:"DRAFTLEARN",date:@date,other_user:cuurent_user.id},headers:@params[:headers])
+          end
+          it "通知が空になる" do
+            expect{delete(api_v1_likes_path,params:{type:"DRAFTLEARN",date:@date,other_user:cuurent_user.id},headers:@params[:headers])}.to change(Notification,:count).from(1).to(0)
+          end
         end
       end
     end

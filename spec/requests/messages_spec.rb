@@ -33,6 +33,15 @@ RSpec.describe "Messages", type: :request do
           expect(before_message_size<Message.all.size).to be_truthy
         end
       end
+      context "通知" do
+        it "通知数が増える" do
+          expect{post(api_v1_user_room_messages_path(cuurent_user.id,room.id),params:{message:{message:"test"}})}.to change(Notification,:count).from(0).to(1)
+        end
+        it "kindは「DM」である" do
+          post(api_v1_user_room_messages_path(cuurent_user.id,room.id),params:{message:{message:"test"}})
+          expect(Notification.all[0].kind).to eq "DM"
+        end
+      end
       context "投稿に失敗する" do
         describe "messageが空" do
           it "ステータスコード401が返って来る。" do
@@ -91,8 +100,6 @@ RSpec.describe "Messages", type: :request do
             end
           end
         end
-      end
-      context "通知" do
       end
     end
   end
